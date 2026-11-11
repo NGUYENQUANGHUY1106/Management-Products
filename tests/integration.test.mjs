@@ -1,5 +1,7 @@
 import { test } from "node:test";
 import { createRequire } from "node:module";
+import { runInNewContext } from "node:vm";
+import ts from "typescript";
 import assert from "node:assert/strict";
 import { readFile, mkdir, writeFile } from "node:fs/promises";
 import { initializeApp, deleteApp } from "firebase/app";
@@ -32,8 +34,10 @@ process.env.GCLOUD_PROJECT = "demo-userhub";
 const { app: serverApp } = await import("../backend-admin/app.js");
 const { auth: adminAuth, db: adminDb } =
   await import("../backend-admin/firebase.js");
-const backendRequire = createRequire(new URL('../backend-admin/package.json', import.meta.url));
-const sharp = backendRequire('sharp');
+const backendRequire = createRequire(
+  new URL("../backend-admin/package.json", import.meta.url),
+);
+const sharp = backendRequire("sharp");
 await test("UserHub integration suite", async (suite) => {
   let server,
     base,
@@ -630,6 +634,116 @@ await test("UserHub integration suite", async (suite) => {
         204,
       );
       assert.equal((await adminDb.doc(`users/${u.uid}`).get()).exists, false);
+    },
+  );
+  await tc(
+    "TC-X10",
+    "Native image uses a File part accepted by the actual Expo SDK 58 multipart serializer",
+    async () => {
+      const sdkSource = await readFile(
+        "node_modules/expo/src/winter/fetch/convertFormData.ts",
+        "utf8",
+      );
+      const sdk = {};
+      runInNewContext(
+        ts.transpileModule(sdkSource, {
+          compilerOptions: {
+            module: ts.ModuleKind.CommonJS,
+            target: ts.ScriptTarget.ES2022,
+          },
+        }).outputText,
+        {
+          exports: sdk,
+          Uint8Array,
+          TextEncoder,
+          Blob,
+          require: () => ({
+            blobToArrayBufferAsync: (blob) => blob.arrayBuffer(),
+          }),
+        },
+      );
+      const legacy = {
+        entries: () => [
+          [
+            "image",
+            {
+              uri: "file:///avatar.jpg",
+              name: "avatar.jpg",
+              type: "image/jpeg",
+            },
+          ],
+        ],
+      };
+      await assert.rejects(
+        sdk.convertFormDataAsync(legacy),
+        /Unsupported FormDataPart implementation/,
+      );
+      const bytes = await readFile("tests/fixtures/avatar.png");
+      class NativeFile {
+        constructor(uri) {
+          this.uri = uri;
+          this.name = "avatar.png";
+          this.type = "image/png";
+          this.size = bytes.length;
+        }
+        async bytes() {
+          return new Uint8Array(bytes);
+        }
+      }
+      class NativeFormData {
+        parts = [];
+        append(name, file) {
+          assert.ok(file instanceof NativeFile);
+          this.parts.push([name, file]);
+        }
+        entries() {
+          return this.parts;
+        }
+      }
+      const nativeSource = await readFile(
+        "src/services/image.native.ts",
+        "utf8",
+      );
+      const native = {};
+      const auth = { currentUser: { getIdToken: async () => userToken } };
+      const transport = async (url, options) => {
+        const encoded = await sdk.convertFormDataAsync(options.body);
+        return fetch(url, {
+          ...options,
+          body: encoded.body,
+          headers: {
+            ...options.headers,
+            "Content-Type": `multipart/form-data; boundary=${encoded.boundary}`,
+          },
+        });
+      };
+      runInNewContext(
+        ts.transpileModule(nativeSource, {
+          compilerOptions: {
+            module: ts.ModuleKind.CommonJS,
+            target: ts.ScriptTarget.ES2022,
+          },
+        }).outputText,
+        {
+          exports: native,
+          FormData: NativeFormData,
+          AbortSignal,
+          require(name) {
+            if (name === "expo-file-system") return { File: NativeFile };
+            if (name === "expo/fetch") return { fetch: transport };
+            if (name === "../config/firebase") return { auth };
+            if (name === "./api") return { apiBase: base };
+            throw Error("Unexpected dependency: " + name);
+          },
+        },
+      );
+      const url = await native.uploadImage({ uri: "file:///avatar.png" });
+      assert.match(url, /\/uploads\/.*\.jpg$/);
+      auth.currentUser = null;
+      await assert.rejects(
+        native.uploadImage({ uri: "file:///avatar.png" }),
+        /đăng nhập/,
+      );
     },
   );
 });

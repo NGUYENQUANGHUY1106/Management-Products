@@ -5,6 +5,23 @@ const adminEmail = process.env.USERHUB_ADMIN_EMAIL || "admin@userhub.test";
 const userEmail = process.env.USERHUB_USER_EMAIL || "member1@userhub.test";
 const stamp = Date.now();
 const email = `browser-${stamp}@userhub.test`;
+async function registerWithPhoto(page: Page, email: string) {
+  await page.goto("/register");
+  await page
+    .getByRole("textbox", { name: "Họ và tên", exact: true })
+    .fill("Đăng ký có ảnh");
+  await page.getByRole("textbox", { name: "Email", exact: true }).fill(email);
+  await page.getByLabel("Mật khẩu", { exact: true }).fill(password);
+  await page.getByLabel("Xác nhận mật khẩu", { exact: true }).fill(password);
+  const chooser = page.waitForEvent("filechooser");
+  await page
+    .getByRole("button", { name: "Chọn ảnh đại diện", exact: true })
+    .click();
+  await (await chooser).setFiles("tests/fixtures/avatar.png");
+  await expect(
+    page.getByText("Ảnh đã chọn sẽ được tải lên khi tạo tài khoản."),
+  ).toBeVisible();
+}
 async function login(page: Page, email: string) {
   await page.goto("/login");
   await page.getByRole("textbox", { name: "Email", exact: true }).fill(email);
@@ -236,4 +253,58 @@ test("TC-ERROR: network error and retry", async ({ page }) => {
   await page.unroute("**/admin/users");
   await page.getByRole("button", { name: "Tải lại", exact: true }).click();
   await expect(page.getByTestId("user-row")).toHaveCount(5);
+});
+
+test("TC-REG-IMAGE: preview before login, authenticated upload during registration and persisted avatar", async ({
+  page,
+}) => {
+  const uploads: string[] = [];
+  page.on("request", (r) => {
+    if (new URL(r.url()).pathname === "/images" && r.method() === "POST")
+      uploads.push(r.headers().authorization || "");
+  });
+  await registerWithPhoto(page, `avatar-${stamp}@userhub.test`);
+  expect(uploads).toEqual([]);
+  await shot(page, "13-register-avatar");
+  await page
+    .getByRole("button", { name: "Tạo tài khoản", exact: true })
+    .click();
+  await expect(page).toHaveURL(/\/user\/profile/);
+  expect(uploads).toHaveLength(1);
+  expect(uploads[0]).toMatch(/^Bearer .+/);
+  await expect(page.getByRole("img", { name: /Ảnh đại diện/ })).toBeVisible();
+  await page.reload();
+  await expect(page.getByRole("img", { name: /Ảnh đại diện/ })).toBeVisible();
+  await shot(page, "14-registered-avatar");
+});
+
+test("TC-REG-RETRY: failed registration image upload rolls back Auth and allows retry with same email", async ({
+  page,
+}) => {
+  await registerWithPhoto(page, `avatar-retry-${stamp}@userhub.test`);
+  await page.route("**/images", (route) =>
+    route.fulfill({
+      status: 503,
+      contentType: "application/json",
+      body: JSON.stringify({
+        error: "Dịch vụ ảnh chưa sẵn sàng. Vui lòng thử lại.",
+      }),
+    }),
+  );
+  await page
+    .getByRole("button", { name: "Tạo tài khoản", exact: true })
+    .click();
+  await expect(page.getByRole("alert")).toContainText(
+    "Dịch vụ ảnh chưa sẵn sàng",
+  );
+  await expect(page).toHaveURL(/\/register/);
+  await expect(
+    page.getByRole("button", { name: "Tạo tài khoản", exact: true }),
+  ).toBeEnabled();
+  await page.unroute("**/images");
+  await page
+    .getByRole("button", { name: "Tạo tài khoản", exact: true })
+    .click();
+  await expect(page).toHaveURL(/\/user\/profile/);
+  await expect(page.getByRole("img", { name: /Ảnh đại diện/ })).toBeVisible();
 });

@@ -8,8 +8,8 @@ Ngày lập: 11/11/2026. Chỉ đổi sang PASS khi đã thực hiện và có b
 | LIVE-02 | Publish firestore.rules vào dự án Management User | Owner/Admin đúng quyền | PASS — deploy và live negative tests |
 | LIVE-03 | Service account local, tạo Admin và cấp custom claim | Admin thực hiện CRUD Auth thật | PASS — live-results.json |
 | LIVE-04 | Đăng ký, đăng nhập, sửa/xóa bằng Firebase thật | Auth/Firestore cùng UID, đủ bốn trường | PASS — 10 kiểm tra live |
-| TC-U06 | Expo Go điện thoại thật chọn ảnh | Preview, upload thành công, Web cùng URL | CHƯA CHẠY TRÊN ĐIỆN THOẠI |
-| TC-M01 | Expo Go: đăng nhập, lưu ảnh, thoát/mở lại | Không lỗi native, session tồn tại | CHƯA CHẠY TRÊN ĐIỆN THOẠI |
+| TC-U06 | Expo Go điện thoại thật chọn ảnh | Preview, upload thành công, Web cùng URL | Bản cũ FAIL do FormData; đã sửa File/Expo fetch, chờ test lại thiết bị |
+| TC-M01 | Expo Go: đăng nhập, lưu ảnh, thoát/mở lại | Không lỗi native, session tồn tại | Đã mở app theo phản hồi; chờ xác nhận upload/persistence sau bản sửa |
 | MOBILE-KB | Mở form trên Android/iOS và bật bàn phím | Trường/nút truy cập được | CHƯA CHẠY TRÊN ĐIỆN THOẠI |
 | MOBILE-PERM | Hủy chọn ảnh / từ chối quyền (nếu OS hỏi) | Không crash; có thể chọn lại | CHƯA CHẠY TRÊN ĐIỆN THOẠI |
 | SUB-01-LIVE | Export Firebase thật và ảnh CSDL | JSON đủ bốn trường, không secret | PASS JSON/snapshot SDK; có thể bổ sung ảnh Firebase Console |

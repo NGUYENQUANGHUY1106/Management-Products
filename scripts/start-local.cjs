@@ -4,7 +4,8 @@ if (!fs.existsSync("backend-admin/.env")) {
   console.error("Configure backend-admin/.env first. See README.");
   process.exit(1);
 }
-const env = { ...process.env, REACT_NATIVE_PACKAGER_HOSTNAME: "172.20.10.2" };
+const ip = require("./configure-lan.cjs").configureLan();
+const env = { ...process.env, REACT_NATIVE_PACKAGER_HOSTNAME: ip };
 const backend = spawn(
   process.execPath,
   ["--env-file=backend-admin/.env", "backend-admin/server.js"],

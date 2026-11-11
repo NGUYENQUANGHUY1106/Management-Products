@@ -1,8 +1,7 @@
 import React, { useState } from "react";
-import { Platform, Text, View } from "react-native";
+import { Text, View } from "react-native";
 import * as ImagePicker from "expo-image-picker";
-import { auth } from "../config/firebase";
-import { apiBase } from "../services/api";
+import { uploadImage } from "../services/image";
 import { Avatar, Button, ErrorBox, styles } from "./ui";
 import { errorMessage } from "../utils/validation";
 export function AvatarPicker({
@@ -10,17 +9,24 @@ export function AvatarPicker({
   value,
   onChange,
   onBusy,
+  onSelect,
+  disabled,
 }: {
   name: string;
   value: string;
   onChange: (url: string) => void;
   onBusy?: (busy: boolean) => void;
+  onSelect?: (asset: ImagePicker.ImagePickerAsset) => void;
+  disabled?: boolean;
 }) {
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [preview, setPreview] = useState("");
   async function choose() {
+    if (busy || disabled) return;
     setError("");
+    setBusy(true);
+    onBusy?.(true);
     try {
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ["images"],
@@ -33,28 +39,12 @@ export function AvatarPicker({
       if (asset.fileSize && asset.fileSize > 5 * 1024 * 1024)
         throw new Error("Ảnh tối đa 5 MB.");
       setPreview(asset.uri);
-      setBusy(true);
-      onBusy?.(true);
-      const form = new FormData();
-      if (Platform.OS === "web") {
-        const blob = await (await fetch(asset.uri)).blob();
-        form.append("image", blob, asset.fileName || "avatar.jpg");
-      } else
-        form.append("image", {
-          uri: asset.uri,
-          name: asset.fileName || "avatar.jpg",
-          type: asset.mimeType || "image/jpeg",
-        } as unknown as Blob);
-      const token = await auth.currentUser?.getIdToken();
-      const r = await fetch(apiBase + "/images", {
-        method: "POST",
-        headers: { Authorization: `Bearer ${token}` },
-        body: form,
-        signal: AbortSignal.timeout(45000),
-      });
-      const data = await r.json();
-      if (!r.ok) throw new Error(data.error || "Không tải được ảnh.");
-      onChange(data.url);
+      if (onSelect) {
+        onSelect(asset);
+        onChange(asset.uri);
+      } else {
+        onChange(await uploadImage(asset));
+      }
       setPreview("");
     } catch (e) {
       setError(errorMessage(e));
@@ -73,6 +63,7 @@ export function AvatarPicker({
             secondary
             title="Chọn ảnh đại diện"
             busy={busy}
+            disabled={disabled}
             onPress={() => {
               void choose();
             }}

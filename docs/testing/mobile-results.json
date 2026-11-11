@@ -1,0 +1,14 @@
+{
+  "reportedOn": "2026-11-11",
+  "beforeFix": {
+    "appOpened": true,
+    "uploadStatus": "FAIL",
+    "error": "Unsupported FormDataPart implementation",
+    "evidence": "User screenshot and report in conversation"
+  },
+  "afterFix": {
+    "change": "expo-file-system File with expo/fetch; deferred upload during registration",
+    "serializerRegression": "PASS (TC-X10, Node with installed Expo serializer and simulated File)",
+    "deviceRetest": "PENDING"
+  }
+}

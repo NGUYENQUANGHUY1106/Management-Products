@@ -122,12 +122,12 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 14189,
+                  "duration": 21897,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-11-11T02:05:42.386Z",
+                  "startTime": "2026-11-11T04:35:39.844Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -137,7 +137,7 @@
           ],
           "id": "3040530360ff2721b663-64b13342fd79b90d35ff",
           "file": "userhub.spec.ts",
-          "line": 21,
+          "line": 38,
           "column": 1
         },
         {
@@ -156,12 +156,12 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 20350,
+                  "duration": 22301,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-11-11T02:05:56.774Z",
+                  "startTime": "2026-11-11T04:36:02.073Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -171,7 +171,7 @@
           ],
           "id": "3040530360ff2721b663-4800e9be08815f57a2cc",
           "file": "userhub.spec.ts",
-          "line": 90,
+          "line": 107,
           "column": 1
         },
         {
@@ -190,12 +190,12 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 7434,
+                  "duration": 10464,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-11-11T02:06:17.140Z",
+                  "startTime": "2026-11-11T04:36:24.392Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -205,7 +205,7 @@
           ],
           "id": "3040530360ff2721b663-e8a85d83c0ef9b764802",
           "file": "userhub.spec.ts",
-          "line": 182,
+          "line": 199,
           "column": 1
         },
         {
@@ -224,12 +224,12 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 8969,
+                  "duration": 9502,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-11-11T02:06:24.598Z",
+                  "startTime": "2026-11-11T04:36:34.873Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -239,7 +239,7 @@
           ],
           "id": "3040530360ff2721b663-c478159b3e2d26bc097d",
           "file": "userhub.spec.ts",
-          "line": 203,
+          "line": 220,
           "column": 1
         },
         {
@@ -258,12 +258,12 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 6011,
+                  "duration": 5203,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-11-11T02:06:33.604Z",
+                  "startTime": "2026-11-11T04:36:44.388Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -273,7 +273,75 @@
           ],
           "id": "3040530360ff2721b663-6dc39a12d4e96f7dbadc",
           "file": "userhub.spec.ts",
-          "line": 228,
+          "line": 245,
+          "column": 1
+        },
+        {
+          "title": "TC-REG-IMAGE: preview before login, authenticated upload during registration and persisted avatar",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 8514,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-11T04:36:49.604Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "3040530360ff2721b663-cc39cc70ac3dfffe8907",
+          "file": "userhub.spec.ts",
+          "line": 258,
+          "column": 1
+        },
+        {
+          "title": "TC-REG-RETRY: failed registration image upload rolls back Auth and allows retry with same email",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 6917,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-11T04:36:58.140Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "3040530360ff2721b663-507c23b3a748c2ed1c90",
+          "file": "userhub.spec.ts",
+          "line": 281,
           "column": 1
         }
       ]
@@ -281,9 +349,9 @@
   ],
   "errors": [],
   "stats": {
-    "startTime": "2026-11-11T02:05:41.514Z",
-    "duration": 58420.145,
-    "expected": 5,
+    "startTime": "2026-11-11T04:35:39.230Z",
+    "duration": 86193.42700000001,
+    "expected": 7,
     "skipped": 0,
     "unexpected": 0,
     "flaky": 0

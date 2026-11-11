@@ -8,7 +8,7 @@ import hashlib
 root = Path(__file__).resolve().parents[1]
 files = set(subprocess.check_output(['git', 'ls-files', '-z', '--cached', '--others', '--exclude-standard'], cwd=root).decode('utf-8').split('\0'))
 files.discard('')
-for folder in ['dist', 'dist-android']:
+for folder in ['dist', 'dist-android', 'dist-ios']:
     for path in (root / folder).rglob('*'):
         if path.is_file():
             files.add(path.relative_to(root).as_posix())
@@ -23,7 +23,7 @@ for name in sorted(files):
     if path.name.startswith('.env') and path.name != '.env.example':
         raise RuntimeError('Unexpected environment file in package: ' + name)
     relative_parts = Path(name).parts
-    static_asset = relative_parts[0] in ['dist', 'dist-android']
+    static_asset = relative_parts[0] in ['dist', 'dist-android', 'dist-ios']
     if any(part in ['.git', 'uploads', 'test-results', 'playwright-report'] for part in relative_parts) or ('node_modules' in relative_parts and not static_asset):
         raise RuntimeError('Unexpected runtime directory in package: ' + name)
     content = path.read_bytes()

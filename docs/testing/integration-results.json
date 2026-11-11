@@ -1,5 +1,5 @@
 {
-  "date": "2026-11-11T02:00:14.401Z",
+  "date": "2026-11-11T04:34:52.301Z",
   "results": [
     {
       "id": "TC-U01",
@@ -148,6 +148,12 @@
     {
       "id": "TC-X09",
       "title": "Delete retry completes profile cleanup after partial failure",
+      "status": "PASS",
+      "environment": "Firebase Emulator"
+    },
+    {
+      "id": "TC-X10",
+      "title": "Native image uses a File part accepted by the actual Expo SDK 58 multipart serializer",
       "status": "PASS",
       "environment": "Firebase Emulator"
     }

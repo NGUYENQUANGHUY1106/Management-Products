@@ -5,7 +5,7 @@
 ## Trạng thái bàn giao
 
 - Đã triển khai các luồng đăng ký, đăng nhập, hồ sơ, ảnh, đăng xuất; Admin tạo/sửa/xóa tài khoản Auth và Firestore, tìm kiếm/sắp xếp/phân trang.
-- Đã kiểm thử 25 ca trên Firebase Emulator, 10 kiểm tra trực tiếp Firebase thật và 5 kịch bản Chromium trên dự án thật. Ảnh trong `docs/screenshots` lấy từ ứng dụng chạy với `management-user-86623`.
+- Đã kiểm thử 26 ca trên Firebase Emulator (gồm hồi quy multipart native), 10 kiểm tra trực tiếp Firebase thật và các kịch bản Chromium trên dự án thật. Kết quả lần chạy mới nhất xem `docs/testing`.
 - Build Web và bundle Android được kiểm tra riêng. Bundle Android **không thay thế** kiểm thử trên điện thoại Expo Go.
 - Firebase thật đã cấu hình Web, service account ngoài source, Rules đã deploy và Admin có custom claim. Expo Go trên điện thoại thật vẫn cần người dùng xác nhận.
 - Báo cáo: `docs/report/UserHub_BaoCao.docx`. Kết quả máy đọc được: `docs/testing/`. Dữ liệu Firebase thật: `docs/database/users.json`.
@@ -25,7 +25,14 @@ node scripts/serve-export.cjs
 
 Thông tin Admin/User demo thật lưu riêng tại `D:\UserHub-Credentials\userhub-login.json`. Không đưa file đó lên GitHub hoặc vào báo cáo. Backend tham chiếu service account tại thư mục này qua `.env` đã được gitignore. Trên máy khác phải cung cấp file xác thực riêng, không sao chép khóa chung source.
 
-Điện thoại cùng Wi-Fi: mở Expo Go và quét `docs/ExpoGo_QR.png`. Địa chỉ hiện tại là `exp://172.20.10.2:8081`. Nếu IP máy đổi, cập nhật `.env` (API URL), `backend-admin/.env` (PUBLIC_API_URL, ALLOWED_ORIGINS) và khởi động lại. Ảnh hiện dùng backend local demo, cần PC hoạt động để truy cập URL ảnh.
+Điện thoại cùng Wi-Fi: mở Expo Go và quét `docs/ExpoGo_QR.png`. Địa chỉ lần cập nhật này là `exp://192.168.2.102:8081`. `start-userhub.cmd` tự dò IP Wi-Fi và cập nhật API URL, PUBLIC_API_URL, ALLOWED_ORIGINS trước khi chạy. Khi đổi mạng cần khởi động lại app/backend và quét QR do Expo in ra. Ảnh local được ánh xạ sang địa chỉ backend hiện tại để tiếp tục hiển thị khi IP đổi.
+
+## Bản sửa ảnh theo phản hồi 11/11/2026
+
+- Đăng ký có mục chọn ảnh và xem trước (không bắt buộc). Chưa gửi ảnh khi chưa có phiên. Khi bấm Tạo tài khoản: tạo Auth → upload có ID token → lưu đúng bốn trường. Upload/ghi hồ sơ thất bại thì xử lý bù Auth; có thể thử lại email cũ.
+- Upload trên Android/iOS dùng `File` từ `expo-file-system` và `expo/fetch`, thay cho object `{uri,name,type}` không được serializer Expo SDK 58 hỗ trợ. Web tiếp tục dùng Blob chuẩn.
+- Kiểm thử TC-X10 tái hiện chính thông báo lỗi cũ bằng serializer thực của SDK đã cài, rồi kiểm tra nhánh native mới gửi multipart hợp lệ đến backend. Test dùng file giả lập trong Node; vẫn cần thử lại trên điện thoại thật.
+- E2E bổ sung đăng ký với ảnh và lỗi dịch vụ ảnh → rollback → thử lại cùng email. Không có thêm field trong Firestore.
 
 ## Chạy nhanh bằng Emulator trên Windows
 

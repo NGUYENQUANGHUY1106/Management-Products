@@ -18,5 +18,10 @@
     "status": "PASS",
     "command": "npx expo export --platform android --output-dir dist-android",
     "evidence": "dist-android/metadata.json; android-build.log: Exported: dist-android"
+  },
+  "iOS bundle": {
+    "status": "PASS",
+    "command": "npx expo export --platform ios --output-dir dist-ios",
+    "evidence": "dist-ios/metadata.json; ios-build.log: Exported: dist-ios"
   }
 }

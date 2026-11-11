@@ -15,6 +15,8 @@ import { useAuth } from "../contexts/AuthContext";
 import { normalizeEmail, errorMessage, validate } from "../utils/validation";
 import { colors as c } from "../constants/theme";
 import { Button, ErrorBox, Field, Loading, styles } from "./ui";
+import { AvatarPicker } from "./AvatarPicker";
+import type { ImagePickerAsset } from "expo-image-picker";
 export default function AuthScreen({
   registration = false,
 }: {
@@ -28,15 +30,18 @@ export default function AuthScreen({
   const [confirm, setConfirm] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  const [image, setImage] = useState<ImagePickerAsset>();
+  const [imageUri, setImageUri] = useState("");
+  const [pickingImage, setPickingImage] = useState(false);
   if (loading) return <Loading />;
-  if (user && !busy)
+  if (user && !busy && !error)
     return <Redirect href={admin ? "/admin/dashboard" : "/user/profile"} />;
   async function submit() {
-    if (busy) return;
+    if (busy || pickingImage) return;
     setBusy(true);
     setError("");
     try {
-      if (registration) await register(email, hoten, password, confirm);
+      if (registration) await register(email, hoten, password, confirm, image);
       else {
         validate(email);
         if (!password) throw new Error("Vui lòng nhập mật khẩu.");
@@ -44,6 +49,7 @@ export default function AuthScreen({
       }
       await refresh();
     } catch (e) {
+      await refresh();
       setError(errorMessage(e));
     } finally {
       setBusy(false);
@@ -143,6 +149,26 @@ export default function AuthScreen({
               </View>
               <View style={styles.card}>
                 {registration && (
+                  <View style={{ gap: 10 }}>
+                    <Text style={styles.label}>
+                      Ảnh đại diện (không bắt buộc)
+                    </Text>
+                    <AvatarPicker
+                      name={hoten}
+                      value={imageUri}
+                      onChange={setImageUri}
+                      onSelect={setImage}
+                      onBusy={setPickingImage}
+                      disabled={busy}
+                    />
+                    {!!image && (
+                      <Text style={styles.subtitle}>
+                        Ảnh đã chọn sẽ được tải lên khi tạo tài khoản.
+                      </Text>
+                    )}
+                  </View>
+                )}
+                {registration && (
                   <Field
                     label="Họ và tên"
                     value={hoten}
@@ -185,6 +211,7 @@ export default function AuthScreen({
                 <Button
                   title={registration ? "Tạo tài khoản" : "Đăng nhập"}
                   busy={busy}
+                  disabled={pickingImage}
                   onPress={() => {
                     void submit();
                   }}

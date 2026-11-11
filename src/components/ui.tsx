@@ -10,6 +10,7 @@ import {
   View,
 } from "react-native";
 import { colors as c } from "../constants/theme";
+import { resolveImageUrl } from "../utils/imageUrl";
 export const styles = StyleSheet.create({
   title: {
     fontSize: 32,
@@ -150,7 +151,7 @@ export function Avatar({
   return uri && failedUri !== uri ? (
     <Image
       accessibilityLabel={`Ảnh đại diện ${name}`}
-      source={{ uri }}
+      source={{ uri: resolveImageUrl(uri) }}
       onError={() => setFailedUri(uri)}
       style={{
         width: size,

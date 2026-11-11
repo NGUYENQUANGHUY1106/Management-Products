@@ -123,7 +123,7 @@ table(['Thông tin', 'Giá trị'], [
     ['Kết quả tự động', f'{passed}/{len(results)} ca tích hợp đạt; {live_passed}/{len(live_results)} kiểm tra Firebase thật đạt; {browser_pass} kịch bản trình duyệt đạt'],
 ])
 p('PHẠM VI BẰNG CHỨNG', 'Heading 2')
-p('Mã nguồn và ảnh trong báo cáo là từ sản phẩm đã chạy. Ảnh Web và responsive Web dùng dự án Firebase thật management-user-86623; ảnh mobile Web không phải ảnh Expo Go. Ảnh Auth/Firestore là dữ liệu thật đọc qua Admin SDK trong trang minh chứng, không phải giao diện Firebase Console. Chưa xác nhận chạy trên điện thoại thật.')
+p('Mã nguồn và ảnh trong báo cáo là từ sản phẩm đã chạy. Ảnh Web và responsive Web dùng dự án Firebase thật management-user-86623; ảnh mobile Web không phải ảnh Expo Go. Ảnh Auth/Firestore là dữ liệu thật đọc qua Admin SDK trong trang minh chứng, không phải giao diện Firebase Console. Người dùng đã mở app trên điện thoại và báo lỗi upload ở bản cũ; còn chờ kiểm lại luồng ảnh sau bản sửa.')
 newpage()
 h('MỤC LỤC')
 chapters = ['1. Tổng quan, mục tiêu và điều kiện nghiệm thu', '2. Công nghệ, kiến trúc và cấu trúc mã nguồn', '3. Phân quyền, dữ liệu và bảo mật', '4. Chức năng User đã triển khai', '5. Chức năng Admin đã triển khai', '6. Thiết kế giao diện và responsive', '7. Cài đặt và chạy từng bước', '8. Firebase thật, Admin và dịch vụ ảnh', '9. Kế hoạch và kết quả kiểm thử', '10. Ma trận truy vết SRS và đề thi', '11. Hình ảnh minh chứng ứng dụng', '12. Dữ liệu JSON, GitHub và video demo', '13. Giới hạn, công việc còn cần nghiệm thu và bàn giao', 'Phụ lục A. Firestore Rules', 'Phụ lục B. Tài liệu tham khảo']
@@ -169,7 +169,7 @@ p('User chỉ đọc hồ sơ chính mình và chỉ cập nhật hoten/hinhanh.
 p('Backend verify ID token và kiểm tra admin:true trên tất cả endpoint /admin. Chặn sửa/xóa chính Admin và mọi tài khoản có admin claim. Token bị thu hồi hoặc tài khoản bị xóa bị từ chối tại backend. CORS chỉ giới hạn origin trình duyệt, không thay cho xác thực. Giới hạn request và ảnh được xử lý ở server.')
 h(chapters[3])
 table(['FR', 'Hành vi đã viết', 'Kiểm tra'], [
-    ['FR-U01', 'Register với tên/email/password/confirm; lowercase email; tạo Auth rồi bốn field; xử lý bù khi ghi thất bại', 'Integration TC-U01/U02; E2E đăng ký/email trùng'],
+    ['FR-U01', 'Register tên/email/password/confirm và ảnh tùy chọn; tạo Auth, upload có token, ghi bốn field; lỗi upload/ghi hồ sơ thì bù Auth', 'TC-U01/U02; E2E đăng ký có ảnh và thử lại sau lỗi upload'],
     ['FR-U02/U06', 'Firebase email/password; route guard; signOut; chặn refresh route bảo vệ', 'Integration login/logout; E2E quyền truy cập'],
     ['FR-U03/U08', 'Hồ sơ chính chủ; email chỉ đọc; không hiển thị mật khẩu', 'E2E Profile/Edit và quyền sửa email'],
     ['FR-U04', 'Validate tên 2–100 ký tự, lưu và phản hồi thành công', 'TC-U05; E2E reload tên mới'],
@@ -208,6 +208,8 @@ code('node --env-file=backend-admin/.env scripts/set-admin-claim.mjs <UID_ADMIN>
 p('Cloudinary lưu ảnh qua backend ký request. Secret chỉ ở backend. Nếu demo offline dùng local uploads với ALLOW_LOCAL_UPLOADS=true; PUBLIC_API_URL phải là URL PC mà điện thoại truy cập được. Ảnh local chỉ tồn tại khi PC/backend còn hoạt động; không coi là lưu trữ công khai bền vững.')
 p('Expo Go: dùng npx expo start --lan, quét QR với app tương thích SDK 58. Không dùng localhost làm URL backend từ điện thoại; đặt EXPO_PUBLIC_ADMIN_API_BASE_URL bằng IP LAN của PC hoặc HTTPS host. Auth native sử dụng AsyncStorage persistence; cần test thoát/mở app trên thiết bị thật.')
 h(chapters[8])
+p('Cập nhật theo phản hồi 11/11/2026: người dùng đã mở app trên điện thoại nhưng gặp Unsupported FormDataPart implementation khi tải ảnh. Đã thay dữ liệu file native từ object uri sang File của expo-file-system và dùng expo/fetch theo SDK 58. TC-X10 tái hiện lỗi cũ bằng chính serializer Expo đã cài, rồi kiểm tra nhánh native mới tạo multipart hợp lệ và upload đến backend. File và môi trường native được giả lập trong Node; kết quả này không thay thế chạy lại trên điện thoại.')
+p('Đăng ký đã bổ sung chọn ảnh/xem trước theo yêu cầu mới của người dùng, ảnh không bắt buộc. Việc upload chỉ thực hiện sau khi tạo Auth để backend vẫn kiểm tra ID token. Test mới xác minh preview không phát request upload, ảnh tồn tại sau reload, và lỗi upload không để lại tài khoản Auth khiến email bị trùng khi thử lại. Schema Firestore giữ nguyên bốn trường.')
 p(f'Kiểm thử tích hợp Emulator: {passed}/{len(results)} PASS. Kiểm tra Firebase thật: {live_passed}/{len(live_results)} PASS. Playwright trên Firebase thật: {browser_pass} kịch bản PASS. Kết quả gốc đọc trực tiếp từ JSON; các kết quả này không thay thế kiểm thử Expo Go thật.')
 table(['Mã', 'Nội dung kiểm thử tích hợp', 'Kết quả'], [[r['id'], r['title'], r['status']] for r in results])
 table(['Mã Firebase thật', 'Nội dung', 'Kết quả'], [[r['id'], r['title'], r['status']] for r in live_results])
@@ -218,6 +220,8 @@ table(['Kiểm tra trình duyệt', 'Phạm vi', 'Kết quả'], [
     ['Web avatar upload', 'Chọn file ảnh, upload, lưu, reload', 'Xem browser-results.json'],
     ['Responsive 390 px', 'User profile và Admin cards, không cuộn ngang', 'Web mobile; không phải Expo Go'],
     ['Lỗi mạng/retry', 'Chặn API danh sách rồi thử tải lại', 'Xem browser-results.json'],
+    ['TC-REG-IMAGE', 'Chọn ảnh trước đăng nhập; tạo Auth; upload có token; reload thấy ảnh', 'Xem browser-results.json'],
+    ['TC-REG-RETRY', 'Upload lỗi; bù Auth; thử lại cùng email thành công', 'Xem browser-results.json'],
     ['Thống kê Playwright', f"Đạt {stats.get('expected', 0)}, lỗi {stats.get('unexpected', 0)}, bỏ qua {stats.get('skipped', 0)}", 'Tự động'],
 ])
 e2e_ok = stats.get('expected', 0) >= 5 and stats.get('unexpected', 0) == 0
@@ -241,7 +245,7 @@ for case_id, title, evidence in [
     ('TC-S01', 'Guest/User không được query collection', 'TC-S01, LIVE-U05'),
     ('TC-S02', 'User không tự sửa email hoặc matkhau', 'TC-S02, LIVE-U05'),
     ('TC-D01', 'JSON chỉ có bốn trường string, AUTH_MANAGED', 'TC-D01, export-users.mjs trên Firebase thật'),
-    ('TC-M01', 'Chạy Expo Go trên điện thoại thật', 'Chờ kết quả và ảnh từ thiết bị'),
+    ('TC-M01', 'Chạy Expo Go trên điện thoại thật', 'Đã mở app; bản cũ lỗi upload; chờ kiểm lại sau sửa'),
 ]:
     status = 'PARTIAL' if case_id == 'TC-U06' else 'PENDING' if case_id == 'TC-M01' else 'PASS' if e2e_ok else 'REVIEW'
     matrix.append({'id': case_id, 'title': title, 'status': status, 'evidence': evidence})
@@ -250,7 +254,7 @@ h('9.1. Đối chiếu đầy đủ 19 test case gốc của SRS', 2)
 table(['Mã SRS', 'Nội dung', 'Trạng thái', 'Bằng chứng'], [[r['id'], r['title'], r['status'], r['evidence']] for r in matrix])
 table(['Check build', 'Kết quả'], [[name, info.get('status', str(info)) if isinstance(info, dict) else info] for name, info in builds.items()] or [['Chưa ghi manifest', 'Xem log build và README']])
 p('Bundle Android là bằng chứng compile JS/Hermes, không phải APK đã cài hoặc xác nhận native runtime. Kiểm thử thiết bị nằm trong docs/testing/manual-checklist.md.')
-table(['Ca SRS cần thiết bị', 'Trạng thái thực tế'], [['TC-U06', 'PASS phần upload/persist trên Web; CHỜ chọn ảnh trên Expo Go thật'], ['TC-M01', 'CHƯA CHẠY trên điện thoại thật'], ['Đồng bộ Web/Expo Go', 'Dữ liệu URL dùng chung đã triển khai; còn xác nhận trực tiếp bằng điện thoại'], ['Firebase thật', f'Rules đã deploy; backend service account hoạt động; {live_passed} kiểm tra trực tiếp đạt']])
+table(['Ca SRS cần thiết bị', 'Trạng thái thực tế'], [['TC-U06', 'Web và serializer mới đạt; bản native cũ FAIL; CHỜ thử lại điện thoại sau sửa'], ['TC-M01', 'Đã mở app theo phản hồi; còn xác nhận upload/session sau bản sửa'], ['Đồng bộ Web/Expo Go', 'Dữ liệu URL dùng chung đã triển khai; còn xác nhận trực tiếp bằng điện thoại'], ['Firebase thật', f'Rules đã deploy; backend service account hoạt động; {live_passed} kiểm tra trực tiếp đạt']])
 h(chapters[9])
 table(['Nhóm yêu cầu', 'Mã nguồn chính', 'Test/bằng chứng'], [
     ['EX-01; FR-U01/U03; FR-A02/A03; BR-01', 'services/auth.ts; backend-admin/app.js; users/index.tsx', 'TC-U01/D01/A02 và LIVE-U01/A02; ảnh Register/Directory; JSON thật'],
@@ -276,6 +280,8 @@ for name, caption in [
     ('10-edit-profile-web.png', 'Hình 9. Form chỉnh sửa hồ sơ dùng chung React Native.'),
     ('11-auth-firebase.png', 'Hình 10. Tài khoản Firebase Authentication thật đọc qua Admin SDK; đây không phải giao diện Console.'),
     ('12-firestore-firebase.png', 'Hình 11. Dữ liệu Firestore thật đọc qua Admin SDK, mỗi hồ sơ đúng bốn trường; đây không phải giao diện Console.'),
+    ('13-register-avatar.png', 'Hình bổ sung A. Đăng ký có ảnh: chọn và xem trước khi tạo tài khoản, chưa upload khi chưa đăng nhập.'),
+    ('14-registered-avatar.png', 'Hình bổ sung B. Hồ sơ tài khoản mới đăng ký giữ ảnh sau khi tải lại trang.'),
 ]:
     newpage()
     image(name, caption)
@@ -323,6 +329,7 @@ for title, url in [
     ('Expo SDK 58', 'https://docs.expo.dev/versions/v58.0.0/'),
     ('Expo Router', 'https://docs.expo.dev/router/introduction/'),
     ('Expo ImagePicker', 'https://docs.expo.dev/versions/v58.0.0/sdk/imagepicker/'),
+    ('Expo FileSystem và upload File/FormData', 'https://docs.expo.dev/versions/v58.0.0/sdk/filesystem/'),
     ('Firebase JS SDK với Expo', 'https://docs.expo.dev/guides/using-firebase/'),
     ('Firebase Web setup', 'https://firebase.google.com/docs/web/setup'),
     ('Firebase Auth', 'https://firebase.google.com/docs/auth/web/start'),

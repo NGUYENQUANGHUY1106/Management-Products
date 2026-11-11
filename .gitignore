@@ -53,6 +53,7 @@ test-results/
 playwright-report/
 docs/screenshots/test-*
 dist-android/
+dist-ios/
 docs/video/page@*.webm
 __pycache__/
 docs/report/preview-*.png
