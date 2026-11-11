@@ -4,6 +4,10 @@
 
 ## Trạng thái bàn giao
 
+**Dữ liệu hiện tại sau khi dọn theo yêu cầu:** Firebase Authentication chỉ còn `admin123@gmail.com` (Admin) và `ba@gmail.com` (User). Firestore `users` chỉ còn hồ sơ của `ba@gmail.com`; Admin dùng custom claim nên không cần document hồ sơ. File `D:\UserHub-Credentials\userhub-login.json` lưu bản ghi nhớ đăng nhập Admin ngoài source; trường `password` trong file này chỉ dành cho Admin, không phải mật khẩu của `ba@gmail.com`.
+
+Các script seed/kiểm thử ghi dữ liệu trên Firebase thật đã được chặn trong chế độ `single-user` để tránh sinh lại tài khoản kiểm thử. Kết quả test/ảnh/video trước khi dọn được giữ làm bằng chứng lịch sử. Các lần kiểm thử tiếp theo nên chạy trên Firebase Emulator.
+
 - Đã triển khai các luồng đăng ký, đăng nhập, hồ sơ, ảnh, đăng xuất; Admin tạo/sửa/xóa tài khoản Auth và Firestore, tìm kiếm/sắp xếp/phân trang.
 - Đã kiểm thử 26 ca trên Firebase Emulator (gồm hồi quy multipart native), 10 kiểm tra trực tiếp Firebase thật và các kịch bản Chromium trên dự án thật. Kết quả lần chạy mới nhất xem `docs/testing`.
 - Build Web và bundle Android được kiểm tra riêng. Bundle Android **không thay thế** kiểm thử trên điện thoại Expo Go.

@@ -8,6 +8,7 @@ import { auth as adminAuth, db as adminDb, emulator } from '../backend-admin/fir
 import { app as expressApp } from '../backend-admin/app.js';
 if (emulator) throw Error('Do not run live-smoke with Emulator variables.');
 const credentials = JSON.parse(await readFile('D:/UserHub-Credentials/userhub-login.json', 'utf8'));
+if (credentials.liveDataMode === 'single-user') throw Error('Live test writes are disabled after account cleanup. Use Firebase Emulator.');
 const config = Object.fromEntries((await readFile('.env', 'utf8')).split(/\r?\n/).filter(l => l.includes('=')).map(l => l.split(/=(.*)/s).slice(0,2)));
 const app = initializeApp({ apiKey: config.EXPO_PUBLIC_FIREBASE_API_KEY, authDomain: config.EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN, projectId: config.EXPO_PUBLIC_FIREBASE_PROJECT_ID, appId: config.EXPO_PUBLIC_FIREBASE_APP_ID }, 'live-test');
 const auth = getAuth(app); const db = getFirestore(app); const results = []; const cleanup = [];

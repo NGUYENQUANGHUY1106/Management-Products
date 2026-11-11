@@ -291,6 +291,10 @@ newpage()
 image('09-directory-mobile-web.png', 'Hình 13. Danh bạ Admin trên responsive Web 390 px; còn chụp Expo Go thật.', width=3.2)
 newpage()
 h(chapters[11])
+cleanup = read_json('docs/testing/account-cleanup.json', {})
+if cleanup:
+    p('Cập nhật dữ liệu sau kiểm thử theo yêu cầu người dùng: đã xóa ' + str(cleanup.get('deletedAuth', 0)) + ' tài khoản cũ và hồ sơ tương ứng; giữ nguyên ba@gmail.com. Admin đã đổi email thành admin123@gmail.com, giữ UID và custom claim. Firebase Authentication hiện còn hai tài khoản; Firestore users chỉ có hồ sơ ba@gmail.com. Mật khẩu Admin được đổi theo lựa chọn của người dùng và chỉ lưu bản ghi nhớ ngoài source tại D:/UserHub-Credentials/userhub-login.json; không chèn vào báo cáo/ZIP.')
+    p('Các ảnh và video kiểm thử ở phần trước là bằng chứng của giai đoạn trước khi dọn dữ liệu, có thể hiển thị tài khoản demo đã xóa hoặc email Admin cũ. File users.json và trang snapshot SDK được cập nhật theo dữ liệu hiện tại. Script seed/test ghi Firebase thật được chặn trong chế độ single-user để không tạo lại tài khoản cũ.')
 p('Dữ liệu nộp: docs/database/users.json, xuất bằng Admin SDK từ dự án Firebase thật management-user-86623; UID là khóa JSON ngoài mỗi object. Không chứa mật khẩu đăng nhập. Ngoài ra có thể giữ bản Emulator riêng users.emulator.json để kiểm thử local.')
 dataset = read_json('docs/database/users.json', {})
 if dataset:

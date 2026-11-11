@@ -1,6 +1,7 @@
 import { chromium } from "@playwright/test";
 import { mkdir, writeFile, readFile } from "node:fs/promises";
 const credentials=JSON.parse(await readFile("D:/UserHub-Credentials/userhub-login.json","utf8"));
+if (credentials.liveDataMode === 'single-user') throw Error('Demo capture is disabled after cleanup because it used shared test-user credentials. Existing screenshots are historical test evidence.');
 await mkdir("docs/screenshots", { recursive: true });
 await mkdir("docs/video", { recursive: true });
 const browser = await chromium.launch();

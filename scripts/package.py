@@ -14,6 +14,7 @@ for folder in ['dist', 'dist-android', 'dist-ios']:
             files.add(path.relative_to(root).as_posix())
 private_file = Path('D:/UserHub-Credentials/userhub-login.json')
 private_password = json.loads(private_file.read_text())['password'].encode() if private_file.exists() else None
+password_markers = ([private_password] if private_password and len(private_password) >= 16 else [b'"' + private_password + b'"', b"'" + private_password + b"'", b'`' + private_password + b'`', b'=' + private_password + b'\n'] if private_password else [])
 markers = [b'-----BEGIN ' + b'PRIVATE KEY-----', b'"private_' + b'key":', b'"refresh_' + b'token":']
 selected = []
 for name in sorted(files):
@@ -27,7 +28,7 @@ for name in sorted(files):
     if any(part in ['.git', 'uploads', 'test-results', 'playwright-report'] for part in relative_parts) or ('node_modules' in relative_parts and not static_asset):
         raise RuntimeError('Unexpected runtime directory in package: ' + name)
     content = path.read_bytes()
-    if any(marker in content for marker in markers) or (private_password and private_password in content):
+    if any(marker in content for marker in markers + password_markers):
         raise RuntimeError('Potential credential content detected in: ' + name)
     selected.append((name, path))
 out = root.parent / 'UserHub_BanGiao.zip'

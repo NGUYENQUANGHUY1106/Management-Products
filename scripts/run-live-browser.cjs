@@ -3,6 +3,7 @@ const { spawnSync } = require("node:child_process");
 const login = JSON.parse(
   readFileSync("D:/UserHub-Credentials/userhub-login.json", "utf8"),
 );
+if (login.liveDataMode === 'single-user') throw new Error('Live test writes are disabled after account cleanup. Run the test suite against Firebase Emulator.');
 const result = spawnSync(
   process.execPath,
   [require.resolve("@playwright/test/cli"), "test"],

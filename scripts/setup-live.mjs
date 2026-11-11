@@ -6,6 +6,7 @@ const folder = 'D:/UserHub-Credentials'; const file = folder + '/userhub-login.j
 await mkdir(folder, { recursive: true });
 let credentials;
 try { credentials = JSON.parse(await readFile(file, 'utf8')); } catch (e) { if (e.code !== 'ENOENT') throw e; }
+if (credentials?.liveDataMode === 'single-user') throw Error('Live demo seeding is disabled after cleanup. Use seed-emulator.mjs.');
 if (!credentials) {
   credentials = { adminEmail: 'admin@userhub.example', userEmail: 'member1@userhub.example', password: randomBytes(18).toString('base64url') + '!42' };
   // Do not reset any pre-existing account with a colliding name.
