@@ -17,7 +17,7 @@ const app = getApps().length
         : process.env.EXPO_PUBLIC_FIREBASE_API_KEY,
       authDomain: process.env.EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN,
       projectId: isEmulator
-        ? "demo-userhub"
+        ? "demo-management-product"
         : process.env.EXPO_PUBLIC_FIREBASE_PROJECT_ID,
       appId: process.env.EXPO_PUBLIC_FIREBASE_APP_ID,
     });

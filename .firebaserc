@@ -1,6 +1,6 @@
 {
   "projects": {
-    "default": "management-user-86623",
-    "demo": "demo-userhub"
+    "default": "management-product-e97a1",
+    "demo": "demo-management-product"
   }
 }

@@ -1,0 +1,26 @@
+[
+  {
+    "name": "Nguyễn Quang Huy",
+    "price": 1000000,
+    "soluong": 10,
+    "image": "http://localhost:3001/uploads/dfb74d4b-03a7-4c57-a177-a42c02c83ef1.jpg"
+  },
+  {
+    "name": "Tai nghe không dây",
+    "price": 1250000,
+    "soluong": 8,
+    "image": "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=640"
+  },
+  {
+    "name": "Bàn phím cơ",
+    "price": 790000,
+    "soluong": 12,
+    "image": "https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=640"
+  },
+  {
+    "name": "Chuột không dây",
+    "price": 350000,
+    "soluong": 25,
+    "image": "http://localhost:3001/uploads/9965d7aa-804d-4c88-9b1e-037db825efeb.jpg"
+  }
+]

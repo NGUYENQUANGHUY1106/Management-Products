@@ -1,7 +1,7 @@
 {
   "config": {
     "argv": [
-      "D:\\Management User\\.tools\\node.exe",
+      "C:\\Program Files\\nodejs\\node.exe",
       "D:\\Management User\\userhub\\node_modules\\@playwright\\test\\cli.js",
       "test"
     ],
@@ -55,7 +55,8 @@
         "testMatch": "**/*.@(spec|test).?(c|m)[jt]s?(x)",
         "timeout": 120000,
         "use": {
-          "baseURL": "http://localhost:8082",
+          "baseURL": "http://localhost:8081",
+          "video": "on",
           "viewport": {
             "width": 1440,
             "height": 1000
@@ -101,13 +102,13 @@
   },
   "suites": [
     {
-      "title": "userhub.spec.ts",
-      "file": "userhub.spec.ts",
+      "title": "products.spec.ts",
+      "file": "products.spec.ts",
       "column": 0,
       "line": 0,
       "specs": [
         {
-          "title": "TC-U01/U02/U03/U04/U05/U07/U08: User lifecycle and protected routes",
+          "title": "admin login, product CRUD, image upload, mobile layout and logout",
           "ok": true,
           "tags": [],
           "tests": [
@@ -122,226 +123,28 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 21897,
+                  "duration": 119660,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-11-11T04:35:39.844Z",
+                  "startTime": "2026-11-11T07:33:36.018Z",
                   "annotations": [],
-                  "attachments": []
+                  "attachments": [
+                    {
+                      "name": "video",
+                      "contentType": "video/webm",
+                      "path": "D:\\Management User\\userhub\\test-results\\products-admin-login-produ-55ba4-ad-mobile-layout-and-logout\\video.webm"
+                    }
+                  ]
                 }
               ],
               "status": "expected"
             }
           ],
-          "id": "3040530360ff2721b663-64b13342fd79b90d35ff",
-          "file": "userhub.spec.ts",
-          "line": 38,
-          "column": 1
-        },
-        {
-          "title": "TC-A01/A02/A03/A04/A05/A06/A07: Admin create edit search sort pagination cancel and delete",
-          "ok": true,
-          "tags": [],
-          "tests": [
-            {
-              "timeout": 120000,
-              "annotations": [],
-              "expectedStatus": "passed",
-              "projectId": "",
-              "projectName": "",
-              "results": [
-                {
-                  "workerIndex": 0,
-                  "parallelIndex": 0,
-                  "status": "passed",
-                  "duration": 22301,
-                  "errors": [],
-                  "stdout": [],
-                  "stderr": [],
-                  "retry": 0,
-                  "startTime": "2026-11-11T04:36:02.073Z",
-                  "annotations": [],
-                  "attachments": []
-                }
-              ],
-              "status": "expected"
-            }
-          ],
-          "id": "3040530360ff2721b663-4800e9be08815f57a2cc",
-          "file": "userhub.spec.ts",
-          "line": 107,
-          "column": 1
-        },
-        {
-          "title": "TC-U06-WEB: choose image upload save and reload",
-          "ok": true,
-          "tags": [],
-          "tests": [
-            {
-              "timeout": 120000,
-              "annotations": [],
-              "expectedStatus": "passed",
-              "projectId": "",
-              "projectName": "",
-              "results": [
-                {
-                  "workerIndex": 0,
-                  "parallelIndex": 0,
-                  "status": "passed",
-                  "duration": 10464,
-                  "errors": [],
-                  "stdout": [],
-                  "stderr": [],
-                  "retry": 0,
-                  "startTime": "2026-11-11T04:36:24.392Z",
-                  "annotations": [],
-                  "attachments": []
-                }
-              ],
-              "status": "expected"
-            }
-          ],
-          "id": "3040530360ff2721b663-e8a85d83c0ef9b764802",
-          "file": "userhub.spec.ts",
-          "line": 199,
-          "column": 1
-        },
-        {
-          "title": "TC-RESP: mobile-sized Web profile and directory (not Expo Go)",
-          "ok": true,
-          "tags": [],
-          "tests": [
-            {
-              "timeout": 120000,
-              "annotations": [],
-              "expectedStatus": "passed",
-              "projectId": "",
-              "projectName": "",
-              "results": [
-                {
-                  "workerIndex": 0,
-                  "parallelIndex": 0,
-                  "status": "passed",
-                  "duration": 9502,
-                  "errors": [],
-                  "stdout": [],
-                  "stderr": [],
-                  "retry": 0,
-                  "startTime": "2026-11-11T04:36:34.873Z",
-                  "annotations": [],
-                  "attachments": []
-                }
-              ],
-              "status": "expected"
-            }
-          ],
-          "id": "3040530360ff2721b663-c478159b3e2d26bc097d",
-          "file": "userhub.spec.ts",
-          "line": 220,
-          "column": 1
-        },
-        {
-          "title": "TC-ERROR: network error and retry",
-          "ok": true,
-          "tags": [],
-          "tests": [
-            {
-              "timeout": 120000,
-              "annotations": [],
-              "expectedStatus": "passed",
-              "projectId": "",
-              "projectName": "",
-              "results": [
-                {
-                  "workerIndex": 0,
-                  "parallelIndex": 0,
-                  "status": "passed",
-                  "duration": 5203,
-                  "errors": [],
-                  "stdout": [],
-                  "stderr": [],
-                  "retry": 0,
-                  "startTime": "2026-11-11T04:36:44.388Z",
-                  "annotations": [],
-                  "attachments": []
-                }
-              ],
-              "status": "expected"
-            }
-          ],
-          "id": "3040530360ff2721b663-6dc39a12d4e96f7dbadc",
-          "file": "userhub.spec.ts",
-          "line": 245,
-          "column": 1
-        },
-        {
-          "title": "TC-REG-IMAGE: preview before login, authenticated upload during registration and persisted avatar",
-          "ok": true,
-          "tags": [],
-          "tests": [
-            {
-              "timeout": 120000,
-              "annotations": [],
-              "expectedStatus": "passed",
-              "projectId": "",
-              "projectName": "",
-              "results": [
-                {
-                  "workerIndex": 0,
-                  "parallelIndex": 0,
-                  "status": "passed",
-                  "duration": 8514,
-                  "errors": [],
-                  "stdout": [],
-                  "stderr": [],
-                  "retry": 0,
-                  "startTime": "2026-11-11T04:36:49.604Z",
-                  "annotations": [],
-                  "attachments": []
-                }
-              ],
-              "status": "expected"
-            }
-          ],
-          "id": "3040530360ff2721b663-cc39cc70ac3dfffe8907",
-          "file": "userhub.spec.ts",
-          "line": 258,
-          "column": 1
-        },
-        {
-          "title": "TC-REG-RETRY: failed registration image upload rolls back Auth and allows retry with same email",
-          "ok": true,
-          "tags": [],
-          "tests": [
-            {
-              "timeout": 120000,
-              "annotations": [],
-              "expectedStatus": "passed",
-              "projectId": "",
-              "projectName": "",
-              "results": [
-                {
-                  "workerIndex": 0,
-                  "parallelIndex": 0,
-                  "status": "passed",
-                  "duration": 6917,
-                  "errors": [],
-                  "stdout": [],
-                  "stderr": [],
-                  "retry": 0,
-                  "startTime": "2026-11-11T04:36:58.140Z",
-                  "annotations": [],
-                  "attachments": []
-                }
-              ],
-              "status": "expected"
-            }
-          ],
-          "id": "3040530360ff2721b663-507c23b3a748c2ed1c90",
-          "file": "userhub.spec.ts",
-          "line": 281,
+          "id": "000c94276132c4f97581-4c1f0fb5af0face3fa79",
+          "file": "products.spec.ts",
+          "line": 5,
           "column": 1
         }
       ]
@@ -349,9 +152,9 @@
   ],
   "errors": [],
   "stats": {
-    "startTime": "2026-11-11T04:35:39.230Z",
-    "duration": 86193.42700000001,
-    "expected": 7,
+    "startTime": "2026-11-11T07:33:35.242Z",
+    "duration": 121732.255,
+    "expected": 1,
     "skipped": 0,
     "unexpected": 0,
     "flaky": 0

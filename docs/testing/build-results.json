@@ -1,27 +1,11 @@
 {
-  "TypeScript": {
-    "status": "PASS",
-    "command": "npm.cmd run typecheck",
-    "evidence": "tsc --noEmit exit 0"
-  },
-  "Lint": {
-    "status": "PASS",
-    "command": "npm.cmd run lint",
-    "evidence": "Expo ESLint exit 0"
-  },
-  "Web build": {
-    "status": "PASS",
-    "command": "npx expo export --platform web",
-    "evidence": "dist/index.html; web-build.log: Exported: dist"
-  },
-  "Android bundle": {
-    "status": "PASS",
-    "command": "npx expo export --platform android --output-dir dist-android",
-    "evidence": "dist-android/metadata.json; android-build.log: Exported: dist-android"
-  },
-  "iOS bundle": {
-    "status": "PASS",
-    "command": "npx expo export --platform ios --output-dir dist-ios",
-    "evidence": "dist-ios/metadata.json; ios-build.log: Exported: dist-ios"
-  }
+  "TypeScript": "PASS",
+  "ESLint": "PASS",
+  "Web export": "PASS",
+  "Android bundle export": "PASS",
+  "Native device testing": "NOT RUN",
+  "Rules emulator": "NOT RUN - requires Java 21; live permissions tested instead",
+  "Price filters and image URL tests": "PASS (5 tests)",
+  "Expo Go SDK 58 manifest": "PASS; LAN API HTTP 200",
+  "Responsive layout 820px/390px": "PASS; no horizontal overflow"
 }

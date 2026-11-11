@@ -1,351 +1,224 @@
-"""Generate the Vietnamese handover report from actual test results and screenshots."""
+"""Build the updated Vietnamese report using current product evidence only."""
 from pathlib import Path
 import json
-from datetime import datetime
 from docx import Document
 from docx.shared import Inches, Pt, RGBColor
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
-from lxml import etree
+from PIL import Image
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / 'docs/report'
 OUT.mkdir(parents=True, exist_ok=True)
-
-def read_json(relative, fallback=None):
-    p = ROOT / relative
-    if not p.exists():
-        return fallback
-    raw = p.read_bytes()
-    return json.loads(raw.decode('utf-16') if raw.startswith(b'\xff\xfe') else raw.decode('utf-8-sig'))
-
-integration = read_json('docs/testing/integration-results.json', {'results': []})
-browser = read_json('docs/testing/browser-results.json', {})
-builds = read_json('docs/testing/build-results.json', {})
-live = read_json('docs/testing/firebase-live-connection.json', {})
-live_results = read_json('docs/testing/live-results.json', {'results': []})['results']
-live_passed = sum(r['status'] == 'PASS' for r in live_results)
-results = integration['results']
-passed = sum(r['status'] == 'PASS' for r in results)
-browser_pass = browser.get('stats', {}).get('expected', 0)
 doc = Document()
 section = doc.sections[0]
-section.page_height = Inches(11.69)
-section.page_width = Inches(8.27)
-section.top_margin = Inches(.8)
-section.bottom_margin = Inches(.75)
-section.left_margin = Inches(.95)
-section.right_margin = Inches(.75)
+section.page_width, section.page_height = Inches(8.27), Inches(11.69)
+section.top_margin = section.bottom_margin = Inches(.7)
+section.left_margin, section.right_margin = Inches(.85), Inches(.7)
 normal = doc.styles['Normal']
-normal.font.name = 'Times New Roman'
-normal.font.size = Pt(12)
-normal.paragraph_format.space_after = Pt(7)
-normal.paragraph_format.line_spacing = 1.15
-for part in doc.part.package.parts:
-    if str(part.partname) == '/word/theme/theme1.xml':
-        theme = etree.fromstring(part.blob)
-        for element in theme.xpath('//*[local-name()="clrScheme"]/*[local-name()="accent1"]/*'):
-            element.set('val', '087C67')
-        part._blob = etree.tostring(theme)
-doc.styles['Caption'].font.color.rgb = RGBColor.from_string('637B75')
-doc.styles['Subtitle'].font.color.rgb = RGBColor.from_string('087C67')
-for name, size in [('Title', 30), ('Heading 1', 19), ('Heading 2', 14), ('Heading 3', 12)]:
-    style = doc.styles[name]
-    style.font.name = 'Arial'
-    style.font.size = Pt(size)
-    style.font.color.rgb = RGBColor.from_string('173539')
-header = section.header.paragraphs[0]
-header.text = 'USERHUB  /  VERDANT LEDGER                                     SRS-UH-02 • v2.0'
-header.style = 'Caption'
+normal.font.name, normal.font.size = 'Times New Roman', Pt(12)
+normal.paragraph_format.line_spacing = 1.12
+normal.paragraph_format.space_after = Pt(6)
+for name in ['Title', 'Subtitle', 'Heading 1', 'Heading 2']:
+    doc.styles[name].font.name = 'Arial'
+    doc.styles[name].font.color.rgb = RGBColor.from_string('173539')
+section.header.paragraphs[0].text = 'MANAGEMENT PRODUCT  |  QUẢN LÝ SẢN PHẨM — PHÂN HỆ ADMIN'
 footer = section.footer.paragraphs[0]
 footer.alignment = 2
-footer.add_run('UserHub • Báo cáo triển khai  |  Trang ')
-field = OxmlElement('w:fldSimple')
-field.set(qn('w:instr'), 'PAGE')
-footer._p.append(field)
+footer.add_run('Management Product | Trang ')
+field = OxmlElement('w:fldSimple'); field.set(qn('w:instr'), 'PAGE'); footer._p.append(field)
 
-def p(text='', style=None):
-    return doc.add_paragraph(text, style)
-
-def h(text, level=1):
-    doc.add_heading(text, level)
-
+def p(text='', style=None): return doc.add_paragraph(text, style)
+def h(text, level=1): doc.add_heading(text, level)
+def page(title): doc.add_page_break(); h(title)
 def table(headers, rows):
-    t = doc.add_table(rows=1, cols=len(headers))
-    t.style = 'Light Shading Accent 1'
-    for cell, text in zip(t.rows[0].cells, headers):
-        cell.text = str(text)
-    repeat = OxmlElement('w:tblHeader')
-    t.rows[0]._tr.get_or_add_trPr().append(repeat)
+    t = doc.add_table(rows=1, cols=len(headers)); t.style = 'Light Shading Accent 1'
+    for cell, text in zip(t.rows[0].cells, headers): cell.text = str(text)
     for row in rows:
-        cells = t.add_row().cells
-        for cell, text in zip(cells, row):
-            cell.text = str(text)
+        for cell, text in zip(t.add_row().cells, row): cell.text = str(text)
     for row in t.rows:
         for cell in row.cells:
             for para in cell.paragraphs:
-                para.paragraph_format.space_after = Pt(4)
-                for run in para.runs:
-                    run.font.size = Pt(10)
+                for run in para.runs: run.font.size = Pt(10)
     p()
-    return t
-
 def code(text):
-    para = p(text)
-    para.paragraph_format.space_after = Pt(9)
-    for run in para.runs:
-        run.font.name = 'Consolas'
-        run.font.size = Pt(9)
-
-def image(name, caption, width=6.3):
+    run = p().add_run(text); run.font.name = 'Consolas'; run.font.size = Pt(9)
+def screenshot(name, caption, max_height=6.6):
     path = ROOT / 'docs/screenshots' / name
-    if path.exists():
-        doc.add_picture(str(path), width=Inches(width))
-        p(caption, 'Caption')
-    else:
-        p('Chưa có ảnh: ' + caption)
+    if not path.exists(): p('Chưa có minh chứng: ' + caption); return
+    with Image.open(path) as im: width, height = im.size
+    scale = min(6.3 / width, max_height / height)
+    doc.add_picture(str(path), width=Inches(width * scale), height=Inches(height * scale))
+    p(caption, 'Caption')
+def read(name, fallback):
+    path = ROOT / name
+    return json.loads(path.read_text(encoding='utf-8-sig')) if path.exists() else fallback
 
-def newpage():
-    doc.add_page_break()
+p('BÁO CÁO THỰC HÀNH', 'Subtitle')
+p('MANAGEMENT\nPRODUCT', 'Title')
+p('Ứng dụng quản lý sản phẩm\nChỉ triển khai phân hệ quản trị viên', 'Subtitle')
+p('Công nghệ: React Native • Expo SDK 58 • Firebase Authentication • Cloud Firestore')
+p('Dự án Firebase: management-product-e97a1')
+p('Sinh viên: Nguyễn Quang Huy')
+p('Ngày cập nhật: 11/11/2026 (giờ Việt Nam)')
+p('Phạm vi: đăng nhập admin; nhập, hiển thị, sửa, xóa sản phẩm; chọn và hiển thị ảnh; chạy web và hỗ trợ ứng dụng di động.')
+p('Dữ liệu sản phẩm chỉ gồm: name, price, soluong, image.')
+p('Báo cáo được viết lại theo đề quản lý sản phẩm. Tài liệu và kết quả UserHub cũ đã được chuyển riêng sang docs/archive-userhub, không được dùng để khẳng định kết quả của bài mới.')
 
-p('BÁO CÁO TRIỂN KHAI PHẦN MỀM', 'Subtitle')
-doc.add_heading('USERHUB', 0)
-p('Hệ thống quản lý tài khoản người dùng\nHai phân hệ USER & ADMIN', 'Subtitle')
-p('React Native • TypeScript / TSX • Expo Router\nFirebase Authentication • Cloud Firestore • Node.js Admin SDK')
-p('Thiết kế giao diện: VERDANT LEDGER')
-p('Đối chiếu đặc tả: SRS_UserHub_v2_User_Admin_Expo_Firebase.docx, phiên bản 2.0 ngày 10/11/2026.')
-table(['Thông tin', 'Giá trị'], [
-    ['Ngày xuất báo cáo', '11/11/2026 — múi giờ Asia/Saigon'],
-    ['Người thực hiện / lớp', 'Nguyễn Quang Huy / 23IT1B'],
-    ['Thư mục sản phẩm', r'D:\Management User\userhub'],
-    ['Firebase mục tiêu', 'Management User / management-user-86623'],
-    ['Môi trường đã kiểm thử', 'Firebase Local Emulator Suite; Firebase management-user-86623 thật; Chromium desktop và responsive Web'],
-    ['Kết quả tự động', f'{passed}/{len(results)} ca tích hợp đạt; {live_passed}/{len(live_results)} kiểm tra Firebase thật đạt; {browser_pass} kịch bản trình duyệt đạt'],
-])
-p('PHẠM VI BẰNG CHỨNG', 'Heading 2')
-p('Mã nguồn và ảnh trong báo cáo là từ sản phẩm đã chạy. Ảnh Web và responsive Web dùng dự án Firebase thật management-user-86623; ảnh mobile Web không phải ảnh Expo Go. Ảnh Auth/Firestore là dữ liệu thật đọc qua Admin SDK trong trang minh chứng, không phải giao diện Firebase Console. Người dùng đã mở app trên điện thoại và báo lỗi upload ở bản cũ; còn chờ kiểm lại luồng ảnh sau bản sửa.')
-newpage()
-h('MỤC LỤC')
-chapters = ['1. Tổng quan, mục tiêu và điều kiện nghiệm thu', '2. Công nghệ, kiến trúc và cấu trúc mã nguồn', '3. Phân quyền, dữ liệu và bảo mật', '4. Chức năng User đã triển khai', '5. Chức năng Admin đã triển khai', '6. Thiết kế giao diện và responsive', '7. Cài đặt và chạy từng bước', '8. Firebase thật, Admin và dịch vụ ảnh', '9. Kế hoạch và kết quả kiểm thử', '10. Ma trận truy vết SRS và đề thi', '11. Hình ảnh minh chứng ứng dụng', '12. Dữ liệu JSON, GitHub và video demo', '13. Giới hạn, công việc còn cần nghiệm thu và bàn giao', 'Phụ lục A. Firestore Rules', 'Phụ lục B. Tài liệu tham khảo']
-for chapter in chapters:
-    p(chapter)
-p('Báo cáo được tạo lại từ scripts/report.py. Kết quả gốc nằm trong docs/testing; cập nhật bằng chứng thực tế rồi chạy lại script để thay đổi trạng thái.')
-newpage()
-h(chapters[0])
-p('UserHub phục vụ hai nhóm: người dùng tự quản lý hồ sơ và quản trị viên quản lý tài khoản đăng nhập. Một codebase React Native được dùng cho Web và ứng dụng Expo. Thiết kế bám SRS v2.0; không lưu thêm trường ngoài email, matkhau, hoten, hinhanh trong document hồ sơ.')
-table(['Mã đề', 'Yêu cầu', 'Cách đáp ứng'], [
-    ['EX-01 / 8 điểm', 'Thêm và hiển thị bốn trường trên Web', 'Auth UID liên kết document Firestore thật; form/danh sách React Native Web; JSON export thật'],
-    ['EX-02 / 1.5 điểm', 'Đăng nhập, sửa, xóa, nâng cao', 'Hai vai trò, backend Admin SDK, search/sort/pagination, xác nhận xóa'],
-    ['EX-03 / 0.5 điểm', 'Nhập ảnh và hiển thị trên di động', 'Expo ImagePicker và upload backend đã viết; còn kiểm tra trên điện thoại thật'],
-    ['SUB-01', 'Báo cáo từng bước/lệnh/ảnh CSDL/JSON', 'DOCX, README, snapshot dữ liệu SDK và JSON thật; có thể bổ sung ảnh Console'],
-    ['SUB-02', 'GitHub source và video', 'Repo local, script demo và video Web local nếu có; chưa có URL công khai'],
-])
-p('Không tự kết luận điểm số đạt được; việc chấm và chấp thuận giá trị AUTH_MANAGED thuộc giảng viên. Bảng này dùng để kiểm tra tính bao phủ yêu cầu.')
-h(chapters[1])
-package = read_json('package.json', {})
-deps = package.get('dependencies', {})
-table(['Thành phần', 'Triển khai'], [
-    ['Giao diện', f"React Native {deps.get('react-native', '')}, TypeScript, React {deps.get('react', '')}"],
-    ['Nền tảng', f"Expo {deps.get('expo', '')}; Expo Router; React Native Web"],
-    ['Dữ liệu', f"Firebase JS SDK {deps.get('firebase', '')}; Auth + Firestore"],
-    ['Backend', 'Express; Firebase Admin SDK; CORS; giới hạn request; Multer; Sharp; Cloudinary signed upload'],
-    ['Kiểm thử', 'Node test runner; @firebase/rules-unit-testing; Playwright Chromium'],
-    ['Tài liệu', 'Python python-docx; ảnh thật từ Playwright; JSON kết quả kiểm thử'],
-])
-code('React Native / Expo Web & Mobile\n  ├─ Firebase Client SDK → Authentication + Firestore (Owner Rules)\n  └─ ID token → Express API → verifyIdToken + admin claim\n                         ├─ Firebase Admin SDK → Auth + Firestore\n                         └─ Sharp → Cloudinary / local demo → URL ảnh')
-p('Các màn hình và component giao diện sử dụng .tsx. File .js/.mjs nằm ở backend hoặc công cụ chạy Node; Firebase Admin SDK không đưa vào bundle client. UID chỉ dùng làm document ID và dữ liệu định danh trên bộ nhớ/API, không trở thành field thứ năm.')
-code('src/\n  app/{login,register}.tsx\n  app/user/{profile,edit-profile}.tsx\n  app/admin/dashboard.tsx\n  app/admin/users/{index,create,[id]/index,[id]/edit}.tsx\n  components/{AuthScreen,Shell,AdminUserForm,AvatarPicker,ui}.tsx\n  config/firebase.ts, firebase.native.ts\n  contexts/AuthContext.tsx; hooks/useUsers.ts\n  services/{auth,api}.ts; types/user.ts; utils/validation.ts\nbackend-admin/{app,server,firebase}.js\nfirestore.rules; firebase.json; tests/; scripts/; docs/')
-h(chapters[2])
-table(['Nghiệp vụ', 'Guest', 'User', 'Admin'], [
-    ['Đăng ký / đăng nhập', 'Có', 'Đăng nhập', 'Đăng nhập'],
-    ['Hồ sơ cá nhân', 'Không', 'Đọc; sửa họ tên và ảnh', 'Có thể tạo hồ sơ cá nhân nếu cần'],
-    ['Danh sách tài khoản', 'Không', 'Không', 'Có'],
-    ['Tạo/sửa/xóa Auth người khác', 'Không', 'Không', 'Qua API đặc quyền'],
-    ['Tìm kiếm/sort/phân trang', 'Không', 'Không', 'Có'],
-])
-code('users/{FirebaseAuthUID}\n{\n  "email": "member@example.test",\n  "matkhau": "AUTH_MANAGED",\n  "hoten": "Nguyễn Văn A",\n  "hinhanh": "https://.../avatar.jpg"\n}')
-p('Mật khẩu được Firebase Authentication quản lý. AUTH_MANAGED là giá trị thay thế cố định, không phải plaintext hoặc hash. Không hiển thị trường matkhau trong trang User/Admin. Không lưu role, uid, createdAt, phone hoặc status trong document.')
-p('User chỉ đọc hồ sơ chính mình và chỉ cập nhật hoten/hinhanh. Rules từ chối list collection cho User/Guest, từ chối tự đổi email/matkhau, thêm field hoặc xóa trực tiếp. Admin list/get được phép qua claim; các thao tác ghi Admin đều đi qua backend để giữ đồng bộ Auth. Đây là cách siết chặt mẫu Rules trong SRS.')
-p('Backend verify ID token và kiểm tra admin:true trên tất cả endpoint /admin. Chặn sửa/xóa chính Admin và mọi tài khoản có admin claim. Token bị thu hồi hoặc tài khoản bị xóa bị từ chối tại backend. CORS chỉ giới hạn origin trình duyệt, không thay cho xác thực. Giới hạn request và ảnh được xử lý ở server.')
-h(chapters[3])
-table(['FR', 'Hành vi đã viết', 'Kiểm tra'], [
-    ['FR-U01', 'Register tên/email/password/confirm và ảnh tùy chọn; tạo Auth, upload có token, ghi bốn field; lỗi upload/ghi hồ sơ thì bù Auth', 'TC-U01/U02; E2E đăng ký có ảnh và thử lại sau lỗi upload'],
-    ['FR-U02/U06', 'Firebase email/password; route guard; signOut; chặn refresh route bảo vệ', 'Integration login/logout; E2E quyền truy cập'],
-    ['FR-U03/U08', 'Hồ sơ chính chủ; email chỉ đọc; không hiển thị mật khẩu', 'E2E Profile/Edit và quyền sửa email'],
-    ['FR-U04', 'Validate tên 2–100 ký tự, lưu và phản hồi thành công', 'TC-U05; E2E reload tên mới'],
-    ['FR-U05', 'Chọn ảnh, preview, upload có xác thực, lưu URL, placeholder ảnh lỗi', 'Web upload đã test; Expo Go thật còn chờ'],
-    ['FR-U07', 'Loading/error/retry; missing profile recovery; thông báo validation', 'API âm; E2E lỗi mạng; checklist thiết bị'],
-])
-h(chapters[4])
-table(['FR', 'Hành vi đã viết', 'Lưu ý'], [
-    ['FR-A01/A11', 'Token claim; dashboard; route guards; logout', 'Không dùng role frontend để cấp quyền'],
-    ['FR-A02/A09', 'Danh sách/avatar/tên/email; chi tiết; loading/empty/error', 'Không hiện matkhau'],
-    ['FR-A03', 'Tạo Auth + profile bằng backend, giữ phiên Admin', 'Nếu ghi Firestore lỗi, xóa Auth vừa tạo'],
-    ['FR-A04', 'Sửa tên/ảnh/email; đồng bộ Auth và Firestore', 'Nếu Firestore lỗi, phục hồi Auth email cũ'],
-    ['FR-A05/A12', 'Modal nêu đúng tài khoản, hủy/xác nhận xóa; khóa nút khi chạy', 'Xóa Auth rồi profile; retry idempotent'],
-    ['FR-A06/A07/A08', 'Tìm email/tên không phân biệt hoa thường; A–Z/Z–A; 5/10 mỗi trang', 'Client-side cho tập dữ liệu nhỏ, UID làm tie-break'],
-    ['FR-A10', 'AvatarPicker dùng chung trên Web/Mobile', 'Kiểm thử thiết bị thật còn chờ'],
-])
-table(['API', 'Chức năng', 'Quyền'], [['GET /admin/users', 'Đọc danh bạ', 'Admin'], ['POST /admin/users', 'Tạo Auth + hồ sơ', 'Admin'], ['PATCH /admin/users/:uid', 'Sửa và đồng bộ email', 'Admin'], ['DELETE /admin/users/:uid', 'Xóa Auth + hồ sơ', 'Admin; cấm Admin target'], ['POST /images', 'Validate/re-encode/upload ảnh', 'Đã đăng nhập'], ['GET /health', 'Kiểm tra trạng thái', 'Công khai; không trả secret']])
-p('Mỗi request tạo/sửa xác thực schema đầu vào. Backend khóa thao tác cùng UID trong một instance. Các lỗi bù bất thành ghi mã reconciliation và UID, không ghi mật khẩu/token. Đây là hệ thống demo một backend; nếu mở rộng nhiều instance cần điều phối và hàng đợi bù bền vững.')
-h(chapters[5])
-p('Verdant Ledger dùng xanh rừng #173539, ngọc #087C67, kem #EDF3F0, trắng và viền #D7E4DD. Login có vùng nhận diện riêng; User ưu tiên hồ sơ; Admin có sidebar và danh bạ. Nút tối thiểu 46 px, input có label/accessibilityLabel, mật khẩu ẩn/hiện, trạng thái lỗi rõ ràng.')
-p('Desktop ≥1024 px có sidebar; dưới ngưỡng này chuyển điều hướng dưới. Danh sách chuyển bố cục card dưới 768 px. Đã chạy Chromium ở 1440×1000 và 390×844, kiểm tra không cuộn ngang. Keyboard tránh che form login trên iOS đã cấu hình; hành vi thực tế còn cần kiểm tra trên thiết bị.')
-h(chapters[6])
-p('Các lệnh sau chạy từ thư mục dự án bằng PowerShell. Dùng npm.cmd/npx.cmd nếu máy chặn file .ps1. Máy triển khai đã tải Node 24 và JDK 21 trong thư mục .tools ngoài repository; runtime không đóng gói chung source.')
-code("cd 'D:\\Management User\\userhub'\nnpm.cmd ci\nnpm.cmd ci --prefix backend-admin\n# Terminal 1\nnpm.cmd run emulators")
-code("# Terminal 2\n$env:FIREBASE_AUTH_EMULATOR_HOST='127.0.0.1:9099'\n$env:FIRESTORE_EMULATOR_HOST='127.0.0.1:8080'\n$env:GCLOUD_PROJECT='demo-userhub'\nnode scripts/seed-emulator.mjs\nnode backend-admin/server.js")
-code("# Terminal 3\n$env:EXPO_PUBLIC_USE_EMULATORS='true'\nnpm.cmd run web")
-p('Mở http://localhost:8081; Emulator UI http://127.0.0.1:4000. Tài khoản Emulator được seed: admin@userhub.test và member1@userhub.test. Mật khẩu chỉ dành cho demo nằm trong README, không lưu trong Firestore hoặc bản export.')
-code('npm.cmd run typecheck\nnpm.cmd run lint\nnpm.cmd run test:integration\n# Seed lại trước E2E vì integration xóa dữ liệu demo\nnode scripts/seed-emulator.mjs\nnpx.cmd playwright install chromium\nnpm.cmd run test:e2e\nnpm.cmd run build:web\nnpx.cmd expo export --platform android --output-dir dist-android')
-p('Test tích hợp chỉ trỏ project demo-userhub và xóa dữ liệu của project demo này. Không chạy đồng thời với một phiên demo cần giữ dữ liệu. Source có file khóa package-lock cho frontend và backend để cài đặt tái lập.')
-h(chapters[7])
-p('Cấu hình Web đã nhận từ người dùng; kiểm tra endpoint cấu hình Authentication trả HTTP ' + str(live.get('httpStatus', 'chưa có')) + '. Điều này chứng minh API key/project có phản hồi, chưa chứng minh các luồng CRUD thật đã nghiệm thu.')
-p('Firebase Console → Authentication → Sign-in method: bật Email/Password. Cloud Firestore đã được tạo theo ảnh người dùng cung cấp. Ứng dụng tự tạo collection users khi đăng ký; không tạo field thủ công khác SRS. Publish firestore.rules từ tab Rules hoặc Firebase CLI.')
-code('npx.cmd firebase deploy --only firestore:rules --project management-user-86623')
-p('Backend đã cấu hình service account do người dùng lưu trong D:/UserHub-Credentials. File khóa nằm ngoài repository; backend-admin/.env chỉ tham chiếu đường dẫn và được gitignore. Đã tạo Admin có custom claim và các tài khoản User demo trên Firebase thật. Thông tin đăng nhập nằm riêng ở D:/UserHub-Credentials/userhub-login.json; không chèn mật khẩu đó vào báo cáo hoặc export. Khi thiết lập máy khác, tạo service account riêng theo Project settings → Service accounts, sau đó cấp claim cho UID Admin bằng script.')
-code('node --env-file=backend-admin/.env scripts/set-admin-claim.mjs <UID_ADMIN>\nnpm.cmd run backend\n# Frontend: .env EXPO_PUBLIC_USE_EMULATORS=false\nnpm.cmd run web')
-p('Cloudinary lưu ảnh qua backend ký request. Secret chỉ ở backend. Nếu demo offline dùng local uploads với ALLOW_LOCAL_UPLOADS=true; PUBLIC_API_URL phải là URL PC mà điện thoại truy cập được. Ảnh local chỉ tồn tại khi PC/backend còn hoạt động; không coi là lưu trữ công khai bền vững.')
-p('Expo Go: dùng npx expo start --lan, quét QR với app tương thích SDK 58. Không dùng localhost làm URL backend từ điện thoại; đặt EXPO_PUBLIC_ADMIN_API_BASE_URL bằng IP LAN của PC hoặc HTTPS host. Auth native sử dụng AsyncStorage persistence; cần test thoát/mở app trên thiết bị thật.')
-h(chapters[8])
-p('Cập nhật theo phản hồi 11/11/2026: người dùng đã mở app trên điện thoại nhưng gặp Unsupported FormDataPart implementation khi tải ảnh. Đã thay dữ liệu file native từ object uri sang File của expo-file-system và dùng expo/fetch theo SDK 58. TC-X10 tái hiện lỗi cũ bằng chính serializer Expo đã cài, rồi kiểm tra nhánh native mới tạo multipart hợp lệ và upload đến backend. File và môi trường native được giả lập trong Node; kết quả này không thay thế chạy lại trên điện thoại.')
-p('Đăng ký đã bổ sung chọn ảnh/xem trước theo yêu cầu mới của người dùng, ảnh không bắt buộc. Việc upload chỉ thực hiện sau khi tạo Auth để backend vẫn kiểm tra ID token. Test mới xác minh preview không phát request upload, ảnh tồn tại sau reload, và lỗi upload không để lại tài khoản Auth khiến email bị trùng khi thử lại. Schema Firestore giữ nguyên bốn trường.')
-p(f'Kiểm thử tích hợp Emulator: {passed}/{len(results)} PASS. Kiểm tra Firebase thật: {live_passed}/{len(live_results)} PASS. Playwright trên Firebase thật: {browser_pass} kịch bản PASS. Kết quả gốc đọc trực tiếp từ JSON; các kết quả này không thay thế kiểm thử Expo Go thật.')
-table(['Mã', 'Nội dung kiểm thử tích hợp', 'Kết quả'], [[r['id'], r['title'], r['status']] for r in results])
-table(['Mã Firebase thật', 'Nội dung', 'Kết quả'], [[r['id'], r['title'], r['status']] for r in live_results])
+page('1. Yêu cầu đề bài và phạm vi thực hiện')
+table(['Yêu cầu', 'Triển khai / minh chứng'], [
+    ['React Native, Flutter hoặc .NET MAUI', 'Giữ React Native và Expo Router từ mã nguồn hiện có.'],
+    ['Nhập và hiển thị trên web (8 điểm)', 'Firestore products, form thêm và danh sách hiển thị đủ bốn trường.'],
+    ['Đăng nhập, xóa, sửa; nâng cao (1,5 điểm)', 'Firebase Auth, custom claim admin, sửa và xác nhận xóa; tìm kiếm, sắp xếp, thống kê tính toán.'],
+    ['Nhập ảnh và hiển thị trên di động (0,5 điểm)', 'expo-image-picker, backend ảnh, Image; đã kiểm tra mobile web và export Android, cần xác minh thiết bị thật.'],
+    ['Không thêm trường dữ liệu', 'Rules hasOnly + hasAll; id chỉ lấy từ metadata document.'],
+    ['Báo cáo, hình ảnh, lệnh cài thư viện, CSDL JSON', 'DOCX này, docs/screenshots, README và docs/database/products.json.'],
+    ['Link GitHub và video demo', 'GitHub: NGUYENQUANGHUY1106/Management-Products; video đính kèm trong docs/video của repository. Chưa tải lên nền tảng video riêng.']])
+p('Chỉ có vai trò quản trị viên trong luồng ứng dụng. Không xây dựng trang user, đăng ký, hồ sơ, chỉnh sửa hồ sơ hay quản lý danh bạ người dùng. Không thêm giỏ hàng, đơn hàng, phân loại hoặc mô tả sản phẩm.')
+h('1.1. Các thay đổi từ dự án cũ', 2)
+p('Tên hiển thị và metadata ứng dụng đổi từ UserHub sang Management Product, phiên bản 3.0.0. Mô hình users được thay bằng products. Các route user, register và admin/users cùng API CRUD người dùng được gỡ khỏi mã nguồn hoạt động. Firebase mới được cấu hình cho cả web, native và backend.')
+
+page('2. Kiến trúc và tổ chức mã nguồn')
+p('Web / Android / iOS dùng chung giao diện React Native. Expo Router điều hướng về /login hoặc /admin/products. Firebase Authentication cấp ID token; custom claim admin xác nhận quyền. Firestore nhận thao tác CRUD trực tiếp từ Firebase client SDK và kiểm tra quyền bằng Security Rules. Backend Node/Express xử lý ảnh và cấp/thu hồi quyền có xác thực admin.')
+table(['Thành phần', 'File / trách nhiệm'], [
+    ['Đăng nhập', 'src/app/login.tsx — email/mật khẩu, chặn tài khoản thiếu claim.'],
+    ['Phiên và phân quyền', 'src/contexts/AuthContext.tsx; src/app/admin/_layout.tsx.'],
+    ['Danh sách, tìm, sắp xếp, xóa', 'src/app/admin/products.tsx — onSnapshot theo thời gian thực.'],
+    ['Form thêm/sửa và chọn ảnh', 'src/components/ProductForm.tsx.'],
+    ['Dữ liệu và kiểm tra', 'src/types/product.ts; src/services/products.ts.'],
+    ['Kết nối Firebase', 'src/config/firebase.ts; firebase.native.ts.'],
+    ['API ảnh', 'backend-admin/app.js; src/services/image.ts và image.native.ts.'],
+    ['Bảo vệ dữ liệu', 'firestore.rules; firebase.json; .firebaserc.'],
+    ['Tạo admin / xuất JSON', 'scripts/setup-live.mjs; scripts/export-products.mjs.'],
+    ['Kiểm thử và báo cáo', 'tests/e2e/products.spec.ts; scripts/verify-live.mjs; scripts/verify-permissions.mjs; scripts/report.py.']])
+p('Không có mật khẩu hoặc service account trong mã nguồn frontend hay báo cáo. Các file .env và thông tin đăng nhập riêng đã được loại khỏi gói mã nguồn.')
+
+page('3. Thiết kế cơ sở dữ liệu đúng đề')
+p('Cloud Firestore, database (default), collection products. Mỗi document biểu diễn một sản phẩm và chỉ có đúng bốn trường. Document ID không phải trường dữ liệu.')
+table(['Trường', 'Kiểu', 'Ràng buộc / ý nghĩa'], [
+    ['name', 'string', 'Tên sản phẩm, 1–150 ký tự; không chỉ khoảng trắng.'],
+    ['price', 'number', 'Giá VNĐ, từ 0 đến 1.000.000.000.000.'],
+    ['soluong', 'integer', 'Số lượng, từ 0 đến 1.000.000.000.'],
+    ['image', 'string', 'URL ảnh HTTP/HTTPS, tối đa 2.048 ký tự.']])
+code(json.dumps({'name':'Bàn phím cơ','price':790000,'soluong':12,'image':'https://example.com/product.jpg'}, ensure_ascii=False, indent=2))
+p('Không ghi id, uid, email, role, category, description hoặc thời gian tạo vào sản phẩm. Số sản phẩm, tổng số lượng và giá trị kho được tính trên ứng dụng, không thêm trường mới.')
+h('3.1. Admin nằm trong Firebase Authentication', 2)
+connection = read('docs/testing/firebase-live-connection.json', {})
+p('Email admin: ' + connection.get('adminEmail', 'Xem file đăng nhập riêng.'))
+p('Custom claim: admin = true. Tài khoản đã được tạo trong Firebase Authentication của dự án mới. Mật khẩu được Firebase quản lý; không tạo collection users hay admins để lưu mật khẩu.')
+h('3.2. File cơ sở dữ liệu nộp kèm', 2)
+p('docs/database/products.json là mảng JSON xuất từ Firestore thật. Mỗi phần tử giữ đúng bốn trường. Có thể đọc file và dùng addDoc để nạp vào collection products; đây là file dữ liệu ứng dụng, không phải định dạng backup nhị phân của dịch vụ gcloud export.')
+code('npm run export:products')
+
+page('4. Cài đặt thư viện và môi trường')
+table(['Nhóm', 'Phiên bản theo package.json'], [
+    ['Runtime', 'Node.js >=22.13; React 19.3.0; React Native 0.88.1.'],
+    ['Expo', 'expo ~58.0.23; expo-router ~58.0.30; expo-image-picker ~58.0.10.'],
+    ['Firebase', 'Client SDK 12.19.0; backend firebase-admin ^14.5.0.'],
+    ['Ảnh / API', 'Express ^5.1.0; multer ^2.0.2; sharp ^0.35.5; cors; express-rate-limit.'],
+    ['Kiểm thử', 'TypeScript ~6.0.3, ESLint, Playwright ^1.65.0.'],
+    ['Báo cáo', 'Python 3, python-docx 1.2.0, Pillow >=11.3.0.']])
+p('Bước 1. Cài dependencies theo lockfile:')
+code('npm ci\nnpm ci --prefix backend-admin\nnpx expo install --check')
+p('Khi cần cài lại các module Expo, dùng bộ cài tương thích SDK:')
+code('npx expo install expo-image-picker expo-file-system @react-native-async-storage/async-storage')
+p('Bước 2. Sao chép .env.example sang .env và backend-admin/.env.example sang backend-admin/.env. Firebase web config thuộc dự án management-product-e97a1. Backend sử dụng service account hoặc ADC có quyền trên chính dự án đó.')
+p('Bước 3. Với tài khoản Firebase CLI đã đăng nhập:')
+code('npx firebase login\nnode scripts/local-adc.cjs\nnpx firebase deploy --only auth,firestore:rules --project management-product-e97a1\nnode scripts/configure-product.cjs\nnpm run setup:live')
+p('setup:live tạo admin và sản phẩm mẫu nếu chưa có; không ghi đè sản phẩm cũ. Email/mật khẩu riêng nằm ở D:/ManagementProduct-Credentials/admin-login.json trên máy bàn giao. Không đóng gói file này vào source hoặc báo cáo.')
+p('PowerShell có thể chặn npm.ps1/npx.ps1: dùng npm.cmd và npx.cmd cho các lệnh tương ứng. Bộ rules emulator cần Java 21 trở lên.')
+
+page('5. Kết nối Firebase mới và bảo vệ dữ liệu')
+p('Đã đăng ký web app Management Product Admin trong dự án management-product-e97a1, bật email/password Authentication, tạo tài khoản admin và cấp claim admin=true. Backend và frontend cùng sử dụng project mới. .firebaserc mặc định trỏ sang dự án mới; dự án emulator riêng là demo-management-product.')
+h('5.1. Các lớp kiểm soát', 2)
+p('Giao diện admin chỉ mount khi phiên đã tải xong và token có quyền admin. Khi đăng nhập bằng tài khoản không có quyền, ứng dụng đăng xuất và báo lỗi. Route guard chuyển người chưa được phép về màn hình đăng nhập.')
+p('Security Rules kiểm tra claim cho đọc, thêm, sửa, xóa. Khi thêm/sửa, rules yêu cầu có đủ và chỉ có name, price, soluong, image, đồng thời kiểm tra kiểu, miền giá trị và URL ảnh. Các collection khác mặc định bị chặn.')
+code("d.keys().hasAll(['name','price','soluong','image'])\n&& d.keys().hasOnly(['name','price','soluong','image'])\n// allow create, update: if admin() && validProduct();")
+p('API /images xác thực Firebase ID token và claim admin, giới hạn tốc độ, dung lượng ảnh 5 MB và kiểm tra nội dung ảnh. API /admin/users đã được loại bỏ. Không dùng kiểm tra giao diện làm lớp bảo vệ duy nhất.')
+h('5.2. Lưu trữ ảnh', 2)
+p('Chọn ảnh bằng expo-image-picker; gửi ảnh tới backend để kiểm tra, đổi JPEG và nhận URL. Ở chế độ chạy tại máy, ảnh nằm trong backend-admin/uploads; Firestore chỉ lưu URL ở image. Có hỗ trợ Cloudinary qua biến môi trường để dùng URL công khai khi triển khai. Backend phải đang chạy để hiển thị ảnh cục bộ.')
+p('Trên điện thoại, dùng cùng Wi-Fi và IP LAN của máy chạy backend, không dùng localhost của điện thoại. Script khởi động tự cập nhật IP. Nếu dùng bản web đã export, cần build lại khi thay IP.')
+
+page('5.3. Cấp và thu hồi quyền admin')
+p('Tài khoản quản trị chính đã được chuyển sang nguyenquanghuy110605@gmail.com, UID ej1v0UNUKogn81JLB9c90Tkn9GA3. Mật khẩu chỉ lưu trong file đăng nhập riêng, không ghi trong báo cáo hoặc mã nguồn.')
+p('Tạo tài khoản mới tại Firebase Console → Authentication → Users → Add user. Sau đó đăng nhập ứng dụng bằng admin hiện có, mở Cài đặt hệ thống → Phân quyền admin, nhập email hoặc UID, bấm Cấp quyền admin và xác nhận. Người nhận cần đăng xuất rồi đăng nhập lại. Console Authentication không có nút chỉnh custom claim admin trực tiếp.')
+p('Thu hồi quyền bằng cùng giao diện. Backend kiểm tra claim admin hiện tại, chặn tài khoản thường tự nâng quyền và chặn tự thu hồi quyền đang sử dụng. Khi thu hồi, xóa riêng claim admin, giữ các claim khác và thu hồi refresh token. ID token Firestore đã phát có thể còn hiệu lực đến khi hết hạn, tối đa khoảng một giờ.')
+code('npm run admin:role -- email@example.com grant\nnpm run admin:role -- UID revoke')
+screenshot('08-admin-roles.png', 'Hình bổ sung. Phân quyền admin bằng email hoặc UID.', 5.5)
+
+page('6. Giao diện đăng nhập admin')
+p('Mở ứng dụng, nhập email/mật khẩu admin, bấm Đăng nhập. Không có đăng ký hoặc điều hướng sang phân hệ user. Màn hình hiển thị trạng thái chờ và lỗi đăng nhập; mật khẩu có thể ẩn/hiện.')
+screenshot('00-login-web.png', 'Hình 1. Màn hình đăng nhập Management Product.')
+
+page('7. Hiển thị và tìm kiếm sản phẩm')
+p('Giao diện có sidebar Kho Hàng, khu vực danh sách dạng bảng, thanh tìm kiếm và sắp xếp mặc định/tên/giá tăng/giá giảm. Bảng hiển thị hình ảnh, tên, giá VNĐ, số lượng và thao tác. onSnapshot nhận thay đổi Firestore theo thời gian thực. Trên điện thoại, sidebar chuyển thành thanh điều hướng và sản phẩm hiển thị theo thẻ để tránh tràn ngang.')
+screenshot('01-products-web.png', 'Hình 2. Danh sách sản phẩm trên web.')
+page('7.1. Lọc theo khoảng giá sản phẩm')
+p('Nhập Giá từ và Giá đến (VNĐ), bấm Áp dụng. Hai biên đều được bao gồm; có thể để trống một đầu để lọc từ mức giá tối thiểu hoặc đến mức giá tối đa. Xóa bộ lọc đưa điều kiện giá về rỗng, giữ nguyên tìm kiếm/sắp xếp. Giá âm, sai kiểu hoặc Giá từ lớn hơn Giá đến được báo lỗi; ứng dụng giữ bộ lọc hợp lệ trước đó.')
+p('Ví dụ: khoảng 300000–800000 hiển thị sản phẩm có giá từ 300.000 đến 800.000 VNĐ. Lọc kết hợp với tên tìm kiếm, sắp xếp và dữ liệu cập nhật thời gian thực. Không thêm trường hoặc collection Firestore.')
+screenshot('09-price-filter.png', 'Hình 2a. Lọc theo khoảng giá, gồm cả hai đầu khoảng.')
+
+page('8. Thêm và sửa sản phẩm')
+p('Bấm Thêm sản phẩm để mở popup, nhập tên, giá, số lượng và chọn ảnh hoặc URL. Khung xem trước có thể gỡ hoặc thay ảnh. Kiểm tra dữ liệu trước khi ghi Firestore; chỉ bốn trường được gửi đi. Bấm Thêm sản phẩm trong popup và chờ thông báo thành công trước khi tải lại trang.')
+screenshot('02-create-product-web.png', 'Hình 3. Form thêm sản phẩm và ảnh đã tải lên.', 5.7)
+p('Chỉnh sửa mở popup nạp dữ liệu sản phẩm; đổi tên, giá, số lượng hoặc ảnh rồi bấm Lưu thay đổi. Nút Hủy hoặc đóng biểu mẫu không ghi dữ liệu. Trong lúc tải ảnh hoặc lưu, các nút được khóa để tránh gửi lặp.')
+doc.add_page_break()
+h('8.1. Minh họa cập nhật sản phẩm')
+screenshot('03-edit-product-web.png', 'Hình 4. Chỉnh sửa giá và số lượng sản phẩm.', 7.0)
+
+page('9. Xóa sản phẩm và đăng xuất')
+p('Bấm Xóa tại sản phẩm tương ứng để mở popup xác nhận trên nền làm mờ. Popup hiển thị rõ tên, ảnh, giá và số lượng. Hủy giữ nguyên dữ liệu; Xác nhận xóa gọi deleteDoc. Lỗi thao tác hiển thị ngay trong popup.')
+screenshot('06-delete-product.png', 'Hình 5. Xác nhận xóa sản phẩm.', 6.2)
+p('Đăng xuất gọi Firebase signOut, route guard chuyển về đăng nhập. Truy cập lại /admin/products sau đăng xuất không xem được dữ liệu.')
+
+page('10. Hiển thị và chọn ảnh trên màn hình di động')
+p('Bố cục React Native tự xuống dòng ở chiều rộng nhỏ. Đã kiểm tra bằng Chromium viewport 390 × 844: hiển thị danh sách và chọn ảnh trong form. Hai hình dưới là mobile web, không phải ảnh chụp thiết bị Android/iOS thật.')
+screenshot('04-products-mobile-web.png', 'Hình 6. Danh sách ở kích thước màn hình điện thoại.', 6.8)
+doc.add_page_break()
+h('10.1. Form chọn ảnh trên mobile web')
+screenshot('05-image-mobile-web.png', 'Hình 7. Chọn và tải ảnh ở kích thước điện thoại.', 6.8)
+p('Đã export bundle Android bằng Expo thành công. Chưa chạy kiểm thử trên điện thoại thật; cần bổ sung phần quay thao tác chọn ảnh trên Expo Go/Android để xác nhận đầy đủ yêu cầu di động của đề.')
+
+page('11. Minh chứng Firebase thật')
+p('Ảnh sau được dựng từ dữ liệu đọc thực qua Firebase Admin SDK. Trang minh chứng ghi rõ nguồn, thời điểm, project ID, tài khoản admin và document products; không phải ảnh Firebase Console. Có thể đối chiếu trực tiếp tại console bằng đường dẫn trong phần 13.')
+screenshot('07-firebase-data.png', 'Hình 8. Bản chụp dữ liệu Auth và Firestore thật từ dự án mới.', 7.3)
+
+page('12. Kiểm thử và kết quả thực tế')
+live = read('docs/testing/live-results.json', {'results': []})
+permissions = read('docs/testing/permissions-results.json', {'results': []})
+roles = read('docs/testing/admin-roles-results.json', {'results': []})
+rows = [(r['name'], r['status']) for r in live['results'] + permissions['results'] + roles['results']]
+table(['Kịch bản kiểm thử Firebase / API', 'Kết quả'], rows)
+browser = read('docs/testing/browser-results.json', {})
 stats = browser.get('stats', {})
-table(['Kiểm tra trình duyệt', 'Phạm vi', 'Kết quả'], [
-    ['User lifecycle', 'Đăng ký/trùng email/sai đúng mật khẩu/đổi tên/reload/chặn Admin/logout', 'Xem browser-results.json'],
-    ['Admin lifecycle', 'Tạo/sửa tên/email/chi tiết/hủy và xóa/tìm kiếm/sort/phân trang', 'Xem browser-results.json'],
-    ['Web avatar upload', 'Chọn file ảnh, upload, lưu, reload', 'Xem browser-results.json'],
-    ['Responsive 390 px', 'User profile và Admin cards, không cuộn ngang', 'Web mobile; không phải Expo Go'],
-    ['Lỗi mạng/retry', 'Chặn API danh sách rồi thử tải lại', 'Xem browser-results.json'],
-    ['TC-REG-IMAGE', 'Chọn ảnh trước đăng nhập; tạo Auth; upload có token; reload thấy ảnh', 'Xem browser-results.json'],
-    ['TC-REG-RETRY', 'Upload lỗi; bù Auth; thử lại cùng email thành công', 'Xem browser-results.json'],
-    ['Thống kê Playwright', f"Đạt {stats.get('expected', 0)}, lỗi {stats.get('unexpected', 0)}, bỏ qua {stats.get('skipped', 0)}", 'Tự động'],
-])
-e2e_ok = stats.get('expected', 0) >= 5 and stats.get('unexpected', 0) == 0
-matrix = []
-for case_id, title, evidence in [
-    ('TC-U01', 'Đăng ký email hợp lệ và hồ sơ bốn trường', 'TC-U01, LIVE-U01, E2E User'),
-    ('TC-U02', 'Đăng ký email trùng', 'TC-U02, LIVE-U02, E2E User'),
-    ('TC-U03', 'Đăng nhập đúng vào hồ sơ', 'TC-U03, LIVE-U08, E2E User'),
-    ('TC-U04', 'Đăng nhập sai không tạo phiên mới', 'TC-U04, LIVE-U02, E2E User'),
-    ('TC-U05', 'Đổi họ tên, chỉ hồ sơ chính chủ đổi', 'TC-U05, LIVE-U05, E2E User'),
-    ('TC-U06', 'Expo Go chọn ảnh, preview, upload và đồng bộ Web', 'Web đạt; còn điện thoại thật'),
-    ('TC-U07', 'User thử truy cập route Admin', 'TC-U07-API, LIVE-U07, E2E route guard'),
-    ('TC-U08', 'Đăng xuất và refresh trang bảo vệ', 'TC-U08-AUTH, LIVE-U08, E2E User'),
-    ('TC-A01', 'Admin claim đăng nhập vào dashboard', 'TC-A01, LIVE-A01, E2E Admin'),
-    ('TC-A02', 'Admin thêm Auth và Firestore cùng UID, giữ phiên', 'TC-A02, LIVE-A02, E2E Admin'),
-    ('TC-A03', 'Admin sửa tên và ảnh đúng hồ sơ', 'TC-A03, E2E Admin, API ảnh'),
-    ('TC-A04', 'Email Auth bằng email Firestore sau khi sửa', 'TC-A04, LIVE-A04, E2E Admin'),
-    ('TC-A05', 'Xác nhận xóa cả Auth và hồ sơ, không đăng nhập lại', 'TC-A05, LIVE-A05, E2E Admin'),
-    ('TC-A06', 'Hủy xóa không thay đổi dữ liệu', 'E2E Admin: hủy, reload, hồ sơ còn'),
-    ('TC-A07', 'Tìm kiếm, sort và pagination không thiếu/lặp', 'E2E Admin: 5/10 trang, case-insensitive search, sort'),
-    ('TC-S01', 'Guest/User không được query collection', 'TC-S01, LIVE-U05'),
-    ('TC-S02', 'User không tự sửa email hoặc matkhau', 'TC-S02, LIVE-U05'),
-    ('TC-D01', 'JSON chỉ có bốn trường string, AUTH_MANAGED', 'TC-D01, export-users.mjs trên Firebase thật'),
-    ('TC-M01', 'Chạy Expo Go trên điện thoại thật', 'Đã mở app; bản cũ lỗi upload; chờ kiểm lại sau sửa'),
-]:
-    status = 'PARTIAL' if case_id == 'TC-U06' else 'PENDING' if case_id == 'TC-M01' else 'PASS' if e2e_ok else 'REVIEW'
-    matrix.append({'id': case_id, 'title': title, 'status': status, 'evidence': evidence})
-(ROOT / 'docs/testing/srs-test-matrix.json').write_text(json.dumps(matrix, ensure_ascii=False, indent=2), encoding='utf-8')
-h('9.1. Đối chiếu đầy đủ 19 test case gốc của SRS', 2)
-table(['Mã SRS', 'Nội dung', 'Trạng thái', 'Bằng chứng'], [[r['id'], r['title'], r['status'], r['evidence']] for r in matrix])
-table(['Check build', 'Kết quả'], [[name, info.get('status', str(info)) if isinstance(info, dict) else info] for name, info in builds.items()] or [['Chưa ghi manifest', 'Xem log build và README']])
-p('Bundle Android là bằng chứng compile JS/Hermes, không phải APK đã cài hoặc xác nhận native runtime. Kiểm thử thiết bị nằm trong docs/testing/manual-checklist.md.')
-table(['Ca SRS cần thiết bị', 'Trạng thái thực tế'], [['TC-U06', 'Web và serializer mới đạt; bản native cũ FAIL; CHỜ thử lại điện thoại sau sửa'], ['TC-M01', 'Đã mở app theo phản hồi; còn xác nhận upload/session sau bản sửa'], ['Đồng bộ Web/Expo Go', 'Dữ liệu URL dùng chung đã triển khai; còn xác nhận trực tiếp bằng điện thoại'], ['Firebase thật', f'Rules đã deploy; backend service account hoạt động; {live_passed} kiểm tra trực tiếp đạt']])
-h(chapters[9])
-table(['Nhóm yêu cầu', 'Mã nguồn chính', 'Test/bằng chứng'], [
-    ['EX-01; FR-U01/U03; FR-A02/A03; BR-01', 'services/auth.ts; backend-admin/app.js; users/index.tsx', 'TC-U01/D01/A02 và LIVE-U01/A02; ảnh Register/Directory; JSON thật'],
-    ['EX-02; FR-U02/U04/U06', 'AuthScreen; AuthContext; user/*.tsx', 'TC-U03/U05/U08 và E2E lifecycle'],
-    ['EX-02; FR-A01/A04/A05/A06/07/08', 'admin layouts; forms/detail/directory; API', 'TC-A01/A03/A04/A05, TC-A06/A07 qua E2E'],
-    ['EX-03; FR-U05/A10', 'AvatarPicker.tsx; POST /images', 'TC-U06-WEB đạt; TC-M01 còn chờ'],
-    ['BR-05/06/07', 'firestore.rules; backend token middleware', 'TC-S01/S02; X01/X02/X03/X06; không có secret trong export'],
-    ['R-05', 'Create/update compensate; delete idempotent', 'TC-X07/X08/X09 chèn lỗi Firestore để kiểm tra bù'],
-    ['SUB-01', 'scripts/report.py; export-users.mjs', 'DOCX + JSON Firebase thật + snapshot SDK'],
-    ['SUB-02', 'Git repo; docs/demo-script.md; docs/video', 'Còn URL GitHub/video công khai'],
-])
-h(chapters[10])
-p('Hình sau là ảnh phần mềm đang chạy với Firebase thật. Tài khoản được tạo để demo/kiểm thử. Hình dữ liệu Auth/Firestore là bản hiển thị dữ liệu đọc qua SDK; chú thích nêu rõ nguồn để tránh nhầm với Firebase Console.')
-for name, caption in [
-    ('00-login-web.png', 'Hình 1. Màn hình đăng nhập React Native Web.'),
-    ('01-register-web.png', 'Hình 2. Đăng ký User với bốn trường giao diện; confirm password không lưu Firestore.'),
-    ('02-user-profile-web.png', 'Hình 3. Hồ sơ User sau cập nhật tên, email chỉ đọc.'),
-    ('03-admin-dashboard.png', 'Hình 4. Dashboard Admin sau khi đăng nhập bằng claim.'),
-    ('04-admin-directory.png', 'Hình 5. Danh bạ, tìm kiếm, sắp xếp và phân trang.'),
-    ('05-admin-user-detail.png', 'Hình 6. Chi tiết tài khoản do Admin vừa tạo.'),
-    ('06-confirm-delete.png', 'Hình 7. Hộp thoại xác nhận xóa đúng tài khoản.'),
-    ('07-avatar-upload-web.png', 'Hình 8. Ảnh được chọn/upload/lưu/reload thành công trên Web.'),
-    ('10-edit-profile-web.png', 'Hình 9. Form chỉnh sửa hồ sơ dùng chung React Native.'),
-    ('11-auth-firebase.png', 'Hình 10. Tài khoản Firebase Authentication thật đọc qua Admin SDK; đây không phải giao diện Console.'),
-    ('12-firestore-firebase.png', 'Hình 11. Dữ liệu Firestore thật đọc qua Admin SDK, mỗi hồ sơ đúng bốn trường; đây không phải giao diện Console.'),
-    ('13-register-avatar.png', 'Hình bổ sung A. Đăng ký có ảnh: chọn và xem trước khi tạo tài khoản, chưa upload khi chưa đăng nhập.'),
-    ('14-registered-avatar.png', 'Hình bổ sung B. Hồ sơ tài khoản mới đăng ký giữ ảnh sau khi tải lại trang.'),
-]:
-    newpage()
-    image(name, caption)
-newpage()
-image('08-profile-mobile-web.png', 'Hình 12. Hồ sơ ở viewport 390×844 trên Chromium. Đây là responsive Web, KHÔNG phải Expo Go.', width=3.2)
-newpage()
-image('09-directory-mobile-web.png', 'Hình 13. Danh bạ Admin trên responsive Web 390 px; còn chụp Expo Go thật.', width=3.2)
-newpage()
-h(chapters[11])
-cleanup = read_json('docs/testing/account-cleanup.json', {})
-if cleanup:
-    p('Cập nhật dữ liệu sau kiểm thử theo yêu cầu người dùng: đã xóa ' + str(cleanup.get('deletedAuth', 0)) + ' tài khoản cũ và hồ sơ tương ứng; giữ nguyên ba@gmail.com. Admin đã đổi email thành admin123@gmail.com, giữ UID và custom claim. Firebase Authentication hiện còn hai tài khoản; Firestore users chỉ có hồ sơ ba@gmail.com. Mật khẩu Admin được đổi theo lựa chọn của người dùng và chỉ lưu bản ghi nhớ ngoài source tại D:/UserHub-Credentials/userhub-login.json; không chèn vào báo cáo/ZIP.')
-    p('Các ảnh và video kiểm thử ở phần trước là bằng chứng của giai đoạn trước khi dọn dữ liệu, có thể hiển thị tài khoản demo đã xóa hoặc email Admin cũ. File users.json và trang snapshot SDK được cập nhật theo dữ liệu hiện tại. Script seed/test ghi Firebase thật được chặn trong chế độ single-user để không tạo lại tài khoản cũ.')
-p('Dữ liệu nộp: docs/database/users.json, xuất bằng Admin SDK từ dự án Firebase thật management-user-86623; UID là khóa JSON ngoài mỗi object. Không chứa mật khẩu đăng nhập. Ngoài ra có thể giữ bản Emulator riêng users.emulator.json để kiểm thử local.')
-dataset = read_json('docs/database/users.json', {})
-if dataset:
-    uid, record = next(iter(dataset.items()))
-    code(json.dumps({uid: record}, ensure_ascii=False, indent=2))
-    p(f'Tổng bản ghi tại thời điểm xuất Firebase thật: {len(dataset)}. Đây là tài khoản demo/test trên dự án thật của người dùng.')
-code('node --env-file=backend-admin/.env scripts/export-users.mjs\n# tạo docs/database/users.json từ dự án thật')
-p('Git repository được khởi tạo local. Chưa có remote GitHub trong thông tin người dùng cung cấp; không dựng URL giả. Các bước xuất bản sau khi có repo riêng:')
-code('git add .\ngit commit -m "feat: implement UserHub SRS v2"\ngit branch -M main\ngit remote add origin <YOUR_REPOSITORY_URL>\ngit push -u origin main')
-p('Video local Web nằm trong docs/video/UserHub_Web_Firebase.webm nếu ghi hình thành công. Đây là ghi hình nhanh phiên trình duyệt trên Firebase thật, không thay thế video có lời thuyết minh 3–6 phút và phần điện thoại thật. Kịch bản đầy đủ trong docs/demo-script.md. Link video công khai: chưa có.')
-h(chapters[12])
-table(['Hạng mục', 'Trạng thái / hành động tiếp'], [
-    ['Source React Native TSX', 'Đã triển khai trong src/; backend tách biệt'],
-    ['Tự động hóa test', f'{passed} ca Emulator, {live_passed} kiểm tra Firebase thật, {browser_pass} kịch bản Web đạt'],
-    ['Cấu hình Firebase Web', 'Đã nhập bản chữ từ người dùng; endpoint config HTTP ' + str(live.get('httpStatus', 'chưa kiểm tra'))],
-    ['Backend Firebase thật', 'Đã kết nối service-account ngoài repo; Admin custom claim hoạt động'],
-    ['Rules production', 'Đã deploy firestore.rules; xác minh bằng các kiểm tra bị từ chối đúng quyền'],
-    ['Expo Go thiết bị thật', 'Cần người dùng quét QR, chọn ảnh, kiểm tra session và chụp bằng chứng'],
-    ['Cloudinary hoặc local demo', 'Cloudinary cần cấu hình backend; local demo cần LAN URL và giữ server chạy'],
-    ['JSON thật', 'Đã xuất docs/database/users.json từ dự án management-user-86623'],
-    ['GitHub/video', 'Cần remote và URL chia sẻ truy cập được'],
-    ['Báo cáo', 'DOCX hiện tại phản ánh kết quả thực tế; cập nhật sau các bước nghiệm thu ngoài máy'],
-])
-p('Chưa đánh dấu hoàn thành toàn bộ bài nộp khi còn kiểm thử điện thoại và URL GitHub/video. Ứng dụng Web đã chạy trên Firebase thật. Người nhận có thể tái lập bằng README và checklist; sau khi bổ sung bằng chứng, chạy python scripts/report.py để cập nhật báo cáo. Nếu cần đúng ảnh Firebase Console theo yêu cầu giảng viên, mở Console của dự án để chụp Auth Users và document bốn trường.')
-for name in ['frontend', 'backend']:
-    audit = read_json(f'docs/testing/audit-{name}.json', {})
-    if audit:
-        v = audit.get('metadata', {}).get('vulnerabilities', {})
-        p(f'Kiểm tra dependency production {name}: ' + ', '.join(f'{key}={v.get(key, 0)}' for key in ['critical', 'high', 'moderate', 'low']) + '. Xem audit JSON để biết phụ thuộc cụ thể. Không tự ép nâng major khi gây xung đột SDK.')
-newpage()
-h('Phụ lục A. Firestore Rules')
-p('Rules đã kiểm thử trên Emulator. Admin tạo/sửa/xóa Auth qua backend; Rules không mở quyền ghi trực tiếp cho Admin. Có thể publish nguyên file firestore.rules vào dự án thật.')
-code((ROOT / 'firestore.rules').read_text(encoding='utf-8'))
-h('Phụ lục B. Tài liệu tham khảo')
-for title, url in [
-    ('Expo SDK 58', 'https://docs.expo.dev/versions/v58.0.0/'),
-    ('Expo Router', 'https://docs.expo.dev/router/introduction/'),
-    ('Expo ImagePicker', 'https://docs.expo.dev/versions/v58.0.0/sdk/imagepicker/'),
-    ('Expo FileSystem và upload File/FormData', 'https://docs.expo.dev/versions/v58.0.0/sdk/filesystem/'),
-    ('Firebase JS SDK với Expo', 'https://docs.expo.dev/guides/using-firebase/'),
-    ('Firebase Web setup', 'https://firebase.google.com/docs/web/setup'),
-    ('Firebase Auth', 'https://firebase.google.com/docs/auth/web/start'),
-    ('Firestore Security Rules', 'https://firebase.google.com/docs/firestore/security/get-started'),
-    ('Custom claims', 'https://firebase.google.com/docs/auth/admin/custom-claims'),
-    ('Admin SDK', 'https://firebase.google.com/docs/admin/setup'),
-    ('Firebase Emulator', 'https://firebase.google.com/docs/emulator-suite/install_and_configure'),
-]:
-    p(f'{title}: {url}')
-p('Tài liệu gốc: SRS_UserHub_v2_User_Admin_Expo_Firebase.docx do người dùng cung cấp. Báo cáo không sao chép trạng thái hoàn thành từ tài liệu thiết kế; kết quả kiểm thử lấy từ các lần chạy thực tế của dự án.')
+p(f"Playwright: {stats.get('expected', 0)} kịch bản đạt; {stats.get('unexpected', 0)} kịch bản lỗi. Kịch bản bao gồm đăng nhập, ảnh, kiểm tra giá âm, thêm, tải lại trang, tìm, sửa, chọn ảnh mobile web, hủy xóa, xóa, đăng xuất và route guard.")
+p('Bổ sung đã kiểm tra khoảng giá gồm hai đầu, khoảng mở, khoảng rỗng, điều kiện sai, xóa lọc, kết hợp tìm kiếm/sắp xếp; kiểm tra ảnh upload localhost cũ được hiển thị qua IP LAN hiện tại. Bố cục 820px và 390px không tràn ngang. Popup thêm/sửa/xóa có thể hủy mà không thay đổi dữ liệu.')
+build = read('docs/testing/build-results.json', {})
+table(['Kiểm tra mã nguồn / build', 'Trạng thái'], [(k, v) for k, v in build.items() if k != 'checkedAt'])
+p('Bộ rules emulator chưa chạy do môi trường Java hiện tại chưa đủ yêu cầu Java 21. Các quyền admin, khách, tài khoản không có claim và schema đã được kiểm tra trực tiếp với dự án Firebase mới. Tài khoản tạm và sản phẩm kiểm thử được dọn sau kiểm thử; ba sản phẩm mẫu được giữ lại.')
+p('Video demo được ghi từ lần Playwright đạt. Kết quả và ảnh chỉ phản ánh các kiểm thử nêu trên; export Android không thay thế kiểm thử trên thiết bị thật.')
 
-path = OUT / 'UserHub_BaoCao.docx'
-doc.save(path)
-print(path)
-print(f'Integration: {passed}/{len(results)} PASS; browser scenarios: {browser_pass}; screenshots embedded: {len(doc.inline_shapes)}')
+page('13. Chạy demo và danh sách tệp nộp')
+code('npm run start:local\n# Hoặc mở start-management-product.cmd\n# Web: http://localhost:8081\n# Bản build xem trước: http://localhost:8082')
+p('Expo Go: cài phiên bản tương thích SDK 58, điện thoại và máy tính cùng Wi-Fi, quét QR trong terminal. Backend ảnh cổng 3001 phải chạy đồng thời. Địa chỉ Expo hiện tại là exp://172.26.100.127:8081; khi đổi mạng dùng QR mới. Nếu iPhone yêu cầu tài khoản Expo, đăng nhập cùng tài khoản trên máy tính và Expo Go. Hướng dẫn chi tiết: docs/run-project.md.')
+p('Đăng nhập bằng file tài khoản riêng. Khi chạy từ máy khác, cài dependencies, tạo .env, cấu hình ADC/service account và tạo/cấp quyền admin phù hợp. Không phát hành thông tin đăng nhập lên GitHub.')
+table(['Nội dung', 'Đường dẫn / trạng thái'], [
+    ['Báo cáo mới', 'docs/report/ManagementProduct_BaoCao.docx'],
+    ['CSDL JSON', 'docs/database/products.json'],
+    ['Minh chứng dữ liệu thật', 'docs/database/firebase-evidence.json; docs/screenshots/07-firebase-data.png'],
+    ['Ảnh minh họa thao tác', 'docs/screenshots/00–07'],
+    ['Video demo web', 'docs/video/ManagementProduct_Demo.webm (tệp cục bộ)'],
+    ['Kết quả kiểm thử', 'docs/testing/*.json'],
+    ['Mã nguồn', 'Thư mục dự án và ManagementProduct_Submission.zip sau khi chạy script đóng gói.'],
+    ['GitHub source code', 'https://github.com/NGUYENQUANGHUY1106/Management-Products'],
+    ['Link video demo', 'https://github.com/NGUYENQUANGHUY1106/Management-Products/blob/main/docs/video/ManagementProduct_Demo.webm (tệp đính kèm; chưa tải lên nền tảng video riêng).']])
+h('13.1. Đối chiếu Firebase Console', 2)
+p('Firestore: https://console.firebase.google.com/project/management-product-e97a1/firestore/databases/-default-/data')
+p('Authentication: https://console.firebase.google.com/project/management-product-e97a1/authentication/users')
+h('13.2. Tài liệu tham khảo chính thức', 2)
+for url in ['https://docs.expo.dev/versions/v58.0.0/', 'https://docs.expo.dev/versions/v58.0.0/sdk/imagepicker/', 'https://firebase.google.com/docs/firestore/security/rules-fields', 'https://firebase.google.com/docs/auth/admin/custom-claims']:
+    p(url)
+
+target = OUT / 'ManagementProduct_BaoCao.docx'
+doc.save(target)
+print(target)

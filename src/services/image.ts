@@ -8,7 +8,7 @@ export async function uploadImage(asset: ImagePickerAsset): Promise<string> {
   const blob = await (await fetch(asset.uri)).blob();
   if (blob.size > 5 * 1024 * 1024) throw new Error("Ảnh tối đa 5 MB.");
   const body = new FormData();
-  body.append("image", blob, asset.fileName || "avatar.jpg");
+  body.append("image", blob, asset.fileName || "product.jpg");
   const response = await fetch(apiBase + "/images", {
     method: "POST",
     headers: { Authorization: `Bearer ${token}` },

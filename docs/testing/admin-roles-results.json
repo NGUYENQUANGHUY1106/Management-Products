@@ -1,0 +1,42 @@
+{
+  "checkedAt": "2026-11-11T07:14:48.215Z",
+  "results": [
+    {
+      "name": "Requested Gmail and UID can login as admin",
+      "status": "PASS"
+    },
+    {
+      "name": "Anonymous role change denied",
+      "status": "PASS"
+    },
+    {
+      "name": "Non-admin cannot promote themselves",
+      "status": "PASS"
+    },
+    {
+      "name": "Input and missing account validation",
+      "status": "PASS"
+    },
+    {
+      "name": "Grant admin by email and preserve other claims",
+      "status": "PASS"
+    },
+    {
+      "name": "New admin token can read products",
+      "status": "PASS"
+    },
+    {
+      "name": "Self revoke rejected",
+      "status": "PASS"
+    },
+    {
+      "name": "Revoke admin by UID and preserve other claims",
+      "status": "PASS"
+    },
+    {
+      "name": "Revoked admin cannot grant using an old token",
+      "status": "PASS"
+    }
+  ],
+  "temporaryAccountRemoved": true
+}

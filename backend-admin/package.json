@@ -1,5 +1,5 @@
 {
-  "name": "userhub-admin",
+  "name": "management-product-admin",
   "private": true,
   "type": "module",
   "scripts": {
@@ -12,7 +12,6 @@
     "express-rate-limit": "^8.2.0",
     "firebase-admin": "^14.5.0",
     "multer": "^2.0.2",
-    "sharp": "^0.35.5",
-    "userhub": "file:.."
+    "sharp": "^0.35.5"
   }
 }

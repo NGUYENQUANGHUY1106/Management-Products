@@ -13,11 +13,11 @@ const { writeFileSync } = require("node:fs");
   writeFileSync(
     "backend-admin/.env",
     [
-      "FIREBASE_PROJECT_ID=management-user-86623",
+      "FIREBASE_PROJECT_ID=management-product-e97a1",
       "GOOGLE_APPLICATION_CREDENTIALS=" + path.replace(/\\/g, "/"),
       "PORT=3001",
       "PUBLIC_API_URL=http://localhost:3001",
-      "ALLOWED_ORIGINS=http://localhost:8081",
+      "ALLOWED_ORIGINS=http://localhost:8081,http://localhost:8082",
       "ALLOW_LOCAL_UPLOADS=true",
     ].join("\n") + "\n",
   );

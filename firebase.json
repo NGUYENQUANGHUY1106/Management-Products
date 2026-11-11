@@ -14,5 +14,10 @@
       "port": 4000
     },
     "singleProjectMode": true
+  },
+  "auth": {
+    "providers": {
+      "emailPassword": true
+    }
   }
 }

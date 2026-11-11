@@ -1,0 +1,30 @@
+{
+  "checkedAt": "2026-11-11T06:52:31.686Z",
+  "results": [
+    {
+      "name": "Non-admin cannot list products",
+      "status": "PASS"
+    },
+    {
+      "name": "Non-admin cannot create products",
+      "status": "PASS"
+    },
+    {
+      "name": "Non-admin cannot delete products",
+      "status": "PASS"
+    },
+    {
+      "name": "Non-admin image upload denied",
+      "status": "PASS"
+    },
+    {
+      "name": "Anonymous image upload denied",
+      "status": "PASS"
+    },
+    {
+      "name": "Removed user API returns 404",
+      "status": "PASS"
+    }
+  ],
+  "temporaryAccountRemoved": true
+}

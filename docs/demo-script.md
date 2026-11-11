@@ -1,12 +1,15 @@
-# Kịch bản video 3–6 phút
+# Kịch bản demo Management Product (chỉ admin)
 
-1. 00:00–00:30: giới thiệu UserHub, React Native TSX, Expo, Firebase; nêu rõ đang demo Emulator hay Firebase thật.
-2. 00:30–01:20: User đăng ký, đăng nhập, xem và đổi họ tên, refresh xác nhận, đăng xuất. Không quay mật khẩu ở chế độ hiện.
-3. 01:20–02:40: Admin đăng nhập, danh sách, tìm email/tên, đảo sort, đổi trang, tạo User mới, sửa email và tên, hủy xóa rồi xác nhận xóa. Chứng minh Admin vẫn giữ phiên.
-4. 02:40–03:40: điện thoại Expo Go thật chọn và lưu ảnh; mở cùng User trên Web để thấy ảnh đồng bộ. Chỉ thực hiện đoạn này khi có điện thoại và kết nối hoạt động.
-5. 03:40–04:30: mở Auth và Firestore Console (hoặc Emulator UI có ghi rõ), đối chiếu UID, bốn trường, AUTH_MANAGED; tài khoản đã xóa không đăng nhập.
-6. 04:30–05:00: giới thiệu source, README, báo cáo DOCX, JSON export, kết quả test và link GitHub.
+1. Mở `start-management-product.cmd`, truy cập web ở cổng 8081 hoặc bản đã build ở cổng 8082.
+2. Đăng nhập bằng tài khoản admin trong file riêng `D:/ManagementProduct-Credentials/admin-login.json`.
+3. Hiển thị danh sách sản phẩm: tên, giá VNĐ, số lượng, hình ảnh.
+4. Thêm sản phẩm; thử nhập giá âm để minh họa kiểm tra dữ liệu, sau đó nhập đúng và chọn ảnh từ máy.
+5. Lưu, tải lại trang để chứng minh dữ liệu được lưu trên Firebase.
+6. Tìm theo tên, chuyển sắp xếp theo giá. Nhập Giá từ `300000` và Giá đến `800000`, bấm Áp dụng; thử bỏ trống một đầu và Xóa bộ lọc.
+7. Bấm Chỉnh sửa để mở popup, sửa giá/số lượng, Lưu thay đổi và đối chiếu kết quả.
+8. Xóa sản phẩm: xem popup có ảnh/tên/giá/số lượng, thử hủy, sau đó xác nhận xóa.
+9. Mở Firebase Console dự án `management-product-e97a1`, hiển thị `products` và đúng bốn trường; mở Authentication để hiển thị admin. Không trình chiếu mật khẩu.
+10. Trên điện thoại cùng Wi-Fi, mở Expo Go và quét QR, đăng nhập admin, chọn ảnh và hiển thị sản phẩm. Phần này cần quay bổ sung trên thiết bị thật.
+11. Đăng xuất, truy cập lại đường dẫn admin để chứng minh bị chuyển về đăng nhập.
 
-URL GitHub: chưa có remote.
-URL video: chưa upload.
-Không thay các URL bằng đường dẫn giả, không dùng wireframe làm bằng chứng.
+Video trong `docs/video/ManagementProduct_Demo.webm` được ghi từ kiểm thử web bằng Playwright, gồm cả kích thước màn hình điện thoại. Đây không phải video chạy trên thiết bị Android/iOS thật.

@@ -1,12 +1,14 @@
 {
-  "date": "2026-11-11T01:40:23.054Z",
-  "httpStatus": 200,
-  "result": {
-    "projectId": "160088704615",
-    "authorizedDomains": [
-      "localhost",
-      "management-user-86623.firebaseapp.com",
-      "management-user-86623.web.app"
-    ]
-  }
+  "projectId": "management-product-e97a1",
+  "adminEmail": "nguyenquanghuy110605@gmail.com",
+  "uid": "ej1v0UNUKogn81JLB9c90Tkn9GA3",
+  "adminClaim": true,
+  "collection": "products",
+  "fields": [
+    "name",
+    "price",
+    "soluong",
+    "image"
+  ],
+  "checkedAt": "2026-11-11T07:14:58.873Z"
 }

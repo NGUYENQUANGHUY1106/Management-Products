@@ -11,7 +11,8 @@ export default defineConfig({
     ["html", { open: "never" }],
   ],
   use: {
-    baseURL: process.env.USERHUB_WEB_URL || "http://localhost:8081",
+    baseURL: process.env.PRODUCT_WEB_URL || "http://localhost:8082",
+    video: "on",
     viewport: { width: 1440, height: 1000 },
     trace: "retain-on-failure",
     screenshot: "only-on-failure",

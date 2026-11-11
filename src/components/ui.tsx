@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import {
   ActivityIndicator,
-  Image,
   Pressable,
   StyleSheet,
   Text,
@@ -10,7 +9,6 @@ import {
   View,
 } from "react-native";
 import { colors as c } from "../constants/theme";
-import { resolveImageUrl } from "../utils/imageUrl";
 export const styles = StyleSheet.create({
   title: {
     fontSize: 32,
@@ -21,10 +19,10 @@ export const styles = StyleSheet.create({
   subtitle: { color: c.muted, fontSize: 15, lineHeight: 24 },
   card: {
     backgroundColor: c.white,
-    padding: 26,
+    padding: 24,
     borderWidth: 1,
     borderColor: c.border,
-    borderRadius: 20,
+    borderRadius: 8,
     gap: 18,
   },
   row: {
@@ -37,12 +35,12 @@ export const styles = StyleSheet.create({
   input: {
     borderColor: c.border,
     borderWidth: 1,
-    borderRadius: 10,
-    padding: 14,
-    fontSize: 16,
+    borderRadius: 5,
+    padding: 10,
+    fontSize: 13,
     color: c.forest,
     backgroundColor: c.light,
-    minHeight: 48,
+    minHeight: 40,
     flex: 1,
   },
   button: {
@@ -137,51 +135,6 @@ export function ErrorBox({ message }: { message?: string }) {
       {message}
     </Text>
   ) : null;
-}
-export function Avatar({
-  name,
-  uri,
-  size = 52,
-}: {
-  name: string;
-  uri?: string;
-  size?: number;
-}) {
-  const [failedUri, setFailedUri] = useState<string>();
-  return uri && failedUri !== uri ? (
-    <Image
-      accessibilityLabel={`Ảnh đại diện ${name}`}
-      source={{ uri: resolveImageUrl(uri) }}
-      onError={() => setFailedUri(uri)}
-      style={{
-        width: size,
-        height: size,
-        borderRadius: size / 2,
-        backgroundColor: c.cream,
-      }}
-    />
-  ) : (
-    <View
-      style={{
-        width: size,
-        height: size,
-        borderRadius: size / 2,
-        backgroundColor: c.cream,
-        alignItems: "center",
-        justifyContent: "center",
-      }}
-    >
-      <Text style={{ color: c.teal, fontSize: size / 3, fontWeight: "700" }}>
-        {name
-          .trim()
-          .split(/\s+/)
-          .slice(-2)
-          .map((x) => x[0])
-          .join("")
-          .toUpperCase() || "U"}
-      </Text>
-    </View>
-  );
 }
 export function Loading() {
   return (

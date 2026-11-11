@@ -1,1 +1,1 @@
-Actual browser recording of UserHub with real Firebase management-user-86623. This short Web recording does not replace the required 3-6 minute narrated video with physical Expo Go evidence. See docs/demo-script.md.
+Video demo web ghi bang Playwright; gom viewport dien thoai, khong phai thiet bi native that. Chua co URL video cong khai.

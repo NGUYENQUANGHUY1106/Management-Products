@@ -1,0 +1,25 @@
+const { writeFileSync } = require('node:fs');
+const { getGlobalDefaultAccount, getAccessToken } = require('firebase-tools/lib/auth');
+(async () => {
+  const project = 'management-product-e97a1';
+  const account = getGlobalDefaultAccount();
+  if (!account) throw Error('Run firebase login first.');
+  const token = await getAccessToken(account.tokens.refresh_token, ['https://www.googleapis.com/auth/cloud-platform', 'https://www.googleapis.com/auth/firebase']);
+  const headers = { Authorization: `Bearer ${token.access_token}`, 'Content-Type': 'application/json', 'x-goog-user-project': project };
+  const url = `https://identitytoolkit.googleapis.com/admin/v2/projects/${project}/config`;
+  const check = await fetch(url, { headers });
+  const config = await check.json();
+  if (!check.ok) throw Error(`Cannot read Auth config (${check.status}): ${config.error?.message}`);
+  const domains = [...new Set([...(config.authorizedDomains || []), 'localhost', `${project}.firebaseapp.com`, `${project}.web.app`])];
+  const response = await fetch(url + '?updateMask=signIn.email,authorizedDomains', { method: 'PATCH', headers, body: JSON.stringify({ signIn: { email: { enabled: true, passwordRequired: true } }, authorizedDomains: domains }) });
+  const result = await response.json();
+  if (!response.ok) throw Error(`Cannot enable email login (${response.status}): ${result.error?.message}`);
+  const appId = '1:780327945369:web:87b3501683388876b62408';
+  const appResponse = await fetch(`https://firebase.googleapis.com/v1beta1/projects/${project}/webApps/${appId}/config`, { headers });
+  const app = await appResponse.json();
+  if (!appResponse.ok) throw Error('Cannot read web app configuration.');
+  const env = `EXPO_PUBLIC_USE_EMULATORS=false\nEXPO_PUBLIC_FIREBASE_PROJECT_ID=${project}\nEXPO_PUBLIC_FIREBASE_AUTH_DOMAIN=${app.authDomain}\nEXPO_PUBLIC_FIREBASE_API_KEY=${app.apiKey}\nEXPO_PUBLIC_FIREBASE_APP_ID=${appId}\nEXPO_PUBLIC_ADMIN_API_BASE_URL=http://localhost:3001\n`;
+  writeFileSync('.env', env);
+  writeFileSync('.env.example', env);
+  console.log('Email/password Auth enabled; frontend configured for ' + project);
+})().catch(e => { console.error(e.message); process.exitCode = 1; });

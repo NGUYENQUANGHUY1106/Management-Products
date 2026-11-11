@@ -57,3 +57,8 @@ dist-ios/
 docs/video/page@*.webm
 __pycache__/
 docs/report/preview-*.png
+
+# Local historical submission and private login files
+/docs/archive-userhub/
+**/admin-login.json
+~$*

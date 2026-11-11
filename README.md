@@ -1,169 +1,106 @@
-# UserHub — React Native / Expo / Firebase
+# Management Product
 
-Ứng dụng quản lý tài khoản User và Admin theo **SRS-UH-02 v2.0**. Giao diện viết bằng **TypeScript/TSX**, dùng React Native và Expo Router; backend Node.js dùng Firebase Admin SDK. Nhận diện Verdant Ledger: xanh rừng, ngọc, kem.
+Hướng dẫn chạy web + Expo Go: [docs/run-project.md](docs/run-project.md).
 
-## Trạng thái bàn giao
+Ứng dụng React Native / Expo SDK 58 quản lý sản phẩm **chỉ dành cho admin**, chạy trên web và hỗ trợ Android/iOS. Firebase mới: `management-product-e97a1`.
 
-**Dữ liệu hiện tại sau khi dọn theo yêu cầu:** Firebase Authentication chỉ còn `admin123@gmail.com` (Admin) và `ba@gmail.com` (User). Firestore `users` chỉ còn hồ sơ của `ba@gmail.com`; Admin dùng custom claim nên không cần document hồ sơ. File `D:\UserHub-Credentials\userhub-login.json` lưu bản ghi nhớ đăng nhập Admin ngoài source; trường `password` trong file này chỉ dành cho Admin, không phải mật khẩu của `ba@gmail.com`.
+## Chức năng
 
-Các script seed/kiểm thử ghi dữ liệu trên Firebase thật đã được chặn trong chế độ `single-user` để tránh sinh lại tài khoản kiểm thử. Kết quả test/ảnh/video trước khi dọn được giữ làm bằng chứng lịch sử. Các lần kiểm thử tiếp theo nên chạy trên Firebase Emulator.
+- Đăng nhập/đăng xuất admin bằng Firebase Authentication, kiểm tra custom claim `admin: true`.
+- Thêm, hiển thị, sửa, xóa sản phẩm trong Firestore; xác nhận trước khi xóa.
+- Chọn và tải ảnh từ thư viện thiết bị hoặc nhập URL ảnh; hiển thị ảnh sản phẩm.
+- Tìm theo tên, lọc khoảng giá từ–đến (gồm cả hai đầu, có thể bỏ trống một đầu), sắp xếp theo tên/giá, thống kê tồn kho và giá trị kho tính từ dữ liệu hiện có.
+- Giao diện sidebar và bảng sản phẩm trên web; popup thêm/sửa, xem trước ảnh, xác nhận xóa; bố cục gọn trên điện thoại.
+- Đồng bộ danh sách theo thời gian thực, kiểm tra dữ liệu và hiển thị lỗi.
 
-- Đã triển khai các luồng đăng ký, đăng nhập, hồ sơ, ảnh, đăng xuất; Admin tạo/sửa/xóa tài khoản Auth và Firestore, tìm kiếm/sắp xếp/phân trang.
-- Đã kiểm thử 26 ca trên Firebase Emulator (gồm hồi quy multipart native), 10 kiểm tra trực tiếp Firebase thật và các kịch bản Chromium trên dự án thật. Kết quả lần chạy mới nhất xem `docs/testing`.
-- Build Web và bundle Android được kiểm tra riêng. Bundle Android **không thay thế** kiểm thử trên điện thoại Expo Go.
-- Firebase thật đã cấu hình Web, service account ngoài source, Rules đã deploy và Admin có custom claim. Expo Go trên điện thoại thật vẫn cần người dùng xác nhận.
-- Báo cáo: `docs/report/UserHub_BaoCao.docx`. Kết quả máy đọc được: `docs/testing/`. Dữ liệu Firebase thật: `docs/database/users.json`.
+Đã bỏ đăng ký, hồ sơ cá nhân, phân hệ user và quản lý tài khoản người dùng. Tài liệu UserHub cũ được giữ riêng trong `docs/archive-userhub/`, không thuộc bài nộp mới.
 
-## Chạy bản đã cấu hình trên máy này
+## Cấp quyền admin cho tài khoản khác
 
-Mở `http://localhost:8082` để dùng bản Web đã build; Expo/Expo Go dùng port 8081. Có thể chạy lại bằng `start-userhub.cmd`, hoặc các terminal:
+Tài khoản chính: `nguyenquanghuy110605@gmail.com`, UID `ej1v0UNUKogn81JLB9c90Tkn9GA3`. Mật khẩu được lưu trong file riêng, không đưa vào source/báo cáo.
 
-```powershell
-cd 'D:\Management User\userhub'
-npm.cmd run backend
-# terminal khác, cùng thư mục
-npm.cmd run web
-# terminal thứ ba: phục vụ dist/ đã build
-node scripts/serve-export.cjs
+1. Mở Firebase Console → Authentication → Users → Add user để tạo email/mật khẩu cho người cần cấp quyền.
+2. Đăng nhập ứng dụng bằng admin hiện có, mở **Cài đặt hệ thống → Phân quyền admin**.
+3. Nhập email hoặc UID, chọn **Cấp quyền admin**, kiểm tra tài khoản và xác nhận.
+4. Người được cấp quyền đăng xuất rồi đăng nhập lại. Muốn thu hồi, nhập email/UID và chọn **Thu hồi quyền admin**. Ứng dụng chặn tự thu hồi quyền đang sử dụng.
+
+Authentication Console không có nút sửa custom claim `admin`; tạo tài khoản ở Console xong cần cấp quyền qua ứng dụng hoặc lệnh sau:
+
+```sh
+npm run admin:role -- email@example.com grant
+npm run admin:role -- UID revoke
 ```
 
-Thông tin Admin/User demo thật lưu riêng tại `D:\UserHub-Credentials\userhub-login.json`. Không đưa file đó lên GitHub hoặc vào báo cáo. Backend tham chiếu service account tại thư mục này qua `.env` đã được gitignore. Trên máy khác phải cung cấp file xác thực riêng, không sao chép khóa chung source.
+Backend kiểm tra quyền admin hiện tại khi nhận lệnh phân quyền; tài khoản chưa có quyền không thể tự cấp quyền. Thu hồi quyền sẽ xóa claim và thu hồi refresh token. ID token Firestore đã phát có thể còn quyền đến khi hết hạn, tối đa khoảng một giờ. Không thêm trường hoặc collection vào Firestore để phân quyền.
 
-Điện thoại cùng Wi-Fi: mở Expo Go và quét `docs/ExpoGo_QR.png`. Địa chỉ lần cập nhật này là `exp://192.168.2.102:8081`. `start-userhub.cmd` tự dò IP Wi-Fi và cập nhật API URL, PUBLIC_API_URL, ALLOWED_ORIGINS trước khi chạy. Khi đổi mạng cần khởi động lại app/backend và quét QR do Expo in ra. Ảnh local được ánh xạ sang địa chỉ backend hiện tại để tiếp tục hiển thị khi IP đổi.
+## Cơ sở dữ liệu
 
-## Bản sửa ảnh theo phản hồi 11/11/2026
+Collection `products`, mỗi document **đúng bốn trường**:
 
-- Đăng ký có mục chọn ảnh và xem trước (không bắt buộc). Chưa gửi ảnh khi chưa có phiên. Khi bấm Tạo tài khoản: tạo Auth → upload có ID token → lưu đúng bốn trường. Upload/ghi hồ sơ thất bại thì xử lý bù Auth; có thể thử lại email cũ.
-- Upload trên Android/iOS dùng `File` từ `expo-file-system` và `expo/fetch`, thay cho object `{uri,name,type}` không được serializer Expo SDK 58 hỗ trợ. Web tiếp tục dùng Blob chuẩn.
-- Kiểm thử TC-X10 tái hiện chính thông báo lỗi cũ bằng serializer thực của SDK đã cài, rồi kiểm tra nhánh native mới gửi multipart hợp lệ đến backend. Test dùng file giả lập trong Node; vẫn cần thử lại trên điện thoại thật.
-- E2E bổ sung đăng ký với ảnh và lỗi dịch vụ ảnh → rollback → thử lại cùng email. Không có thêm field trong Firestore.
+| Trường | Kiểu | Quy tắc |
+|---|---|---|
+| name | string | Tên từ 1 đến 150 ký tự, không chỉ khoảng trắng |
+| price | number | Từ 0 đến 1.000.000.000.000, đơn vị VNĐ |
+| soluong | integer | Từ 0 đến 1.000.000.000 |
+| image | string | URL HTTP/HTTPS, tối đa 2.048 ký tự |
 
-## Chạy nhanh bằng Emulator trên Windows
+Document ID do Firestore quản lý, không ghi thêm trường `id`. Không thêm category, description, createdAt hay role vào document sản phẩm. Admin nằm trong **Firebase Authentication**, quyền nằm trong custom claim; không lưu mật khẩu trong Firestore. Rules chặn toàn bộ truy cập sản phẩm của người chưa đăng nhập hoặc không có quyền admin.
 
-Yêu cầu Node.js 22.13+ (khuyến nghị Node 24 LTS), Java 21+, Python 3 nếu tạo lại DOCX. Không cần Firebase trả phí, service account hay tài khoản Google để chạy Emulator.
+## Chạy trên máy hiện tại
 
-```powershell
-cd 'D:\Management User\userhub'
-npm.cmd ci
-npm.cmd ci --prefix backend-admin
+1. Mở `start-management-product.cmd`, hoặc chạy `npm run start:local`.
+2. Mở http://localhost:8081. Nếu đã build, bản xem trước có ở http://localhost:8082.
+3. Tài khoản admin đã tạo trong Firebase. Xem email/mật khẩu tại `D:/ManagementProduct-Credentials/admin-login.json` (ngoài mã nguồn).
+
+Script khởi động tự cấu hình IP LAN cho backend ảnh và Expo Go. Điện thoại cần cùng Wi-Fi, quét QR từ Expo. Sau khi thay IP, chạy lại `npm run build:web` nếu dùng bản `dist` ở cổng 8082.
+
+## Cài trên máy khác
+
+Yêu cầu Node.js >=22.13, Python 3 với python-docx để tạo báo cáo. Dùng `npm.cmd`/`npx.cmd` trên PowerShell nếu execution policy chặn file `.ps1`.
+
+```sh
+npm ci
+npm ci --prefix backend-admin
+npx expo install --check
 ```
 
-Mở **3 terminal PowerShell** tại thư mục dự án:
+Sao chép `.env.example` thành `.env`. Frontend chỉ chứa cấu hình Firebase web công khai, không chứa service account. Sao chép `backend-admin/.env.example` thành `backend-admin/.env`, điền đường dẫn service account có quyền với dự án mới. Trên máy đã đăng nhập Firebase CLI, có thể chạy `node scripts/local-adc.cjs` để dùng ADC cục bộ.
 
-```powershell
-# Terminal 1
-npm.cmd run emulators
+```sh
+npx firebase login
+npx firebase deploy --only auth,firestore:rules --project management-product-e97a1
+node scripts/configure-product.cjs
+npm run setup:live
+npm run start:local
 ```
 
-```powershell
-# Terminal 2 — chỉ dùng dữ liệu demo-userhub
-$env:FIREBASE_AUTH_EMULATOR_HOST='127.0.0.1:9099'
-$env:FIRESTORE_EMULATOR_HOST='127.0.0.1:8080'
-$env:GCLOUD_PROJECT='demo-userhub'
-node scripts/seed-emulator.mjs
-node backend-admin/server.js
-```
+`setup:live` tạo admin và ba sản phẩm mẫu nếu chưa có; không đặt lại mật khẩu hay ghi đè sản phẩm đã có. Đường dẫn lưu tài khoản trong script là đường dẫn riêng cho máy bàn giao; đổi sang thư mục riêng trên máy khác. Với admin hiện có, dùng `node --env-file=backend-admin/.env scripts/set-admin-claim.mjs UID` để cấp quyền theo chủ đích.
 
-```powershell
-# Terminal 3
-$env:EXPO_PUBLIC_USE_EMULATORS='true'
-npm.cmd run web
-```
+## Hình ảnh
 
-Mở http://localhost:8081. Xem CSDL/Auth ở http://127.0.0.1:4000.
+Backend `/images` xác minh token và quyền admin, giới hạn 5 MB, kiểm tra ảnh bằng Sharp rồi chuyển JPEG. Trong bản chạy tại máy, ảnh được lưu ở `backend-admin/uploads/` và trường `image` lưu URL backend. Khi dùng điện thoại, backend phải truy cập được qua IP LAN. Khi đưa ứng dụng lên Internet, cấu hình Cloudinary trong backend hoặc triển khai backend ảnh có lưu trữ bền vững; URL localhost/LAN không dùng được từ Internet.
 
-Tài khoản **chỉ dành cho Emulator**:
+## Kiểm tra và xuất bài
 
-| Vai trò | Email | Mật khẩu demo |
-| --- | --- | --- |
-| Admin | admin@userhub.test | EmulatorOnly!42 |
-| User | member1@userhub.test | EmulatorOnly!42 |
-
-Các mật khẩu demo này không phải mật khẩu Firestore và không được dùng cho Firebase thật. Seed chỉ chạy trên `demo-userhub`, không ghi vào dự án thật.
-
-Nếu PowerShell chặn `npm.ps1`, dùng `npm.cmd`/`npx.cmd` như ví dụ. Máy đang triển khai có runtime hỗ trợ tại `D:\Management User\.tools`; có thể thêm tạm vào PATH khi cần:
-
-```powershell
-$env:Path='D:\Management User\.tools;'+$env:Path
-$env:JAVA_HOME='D:\Management User\.tools\jdk-21.0.9+10'
-$env:Path=$env:JAVA_HOME+'\bin;'+$env:Path
-```
-
-## Kết nối Firebase Management User thật
-
-1. Firebase Console → Project settings → General → Your apps → Web → SDK setup and configuration → Config. Sao chép chính xác vào `.env` theo `.env.example`. Không suy đoán API key từ ảnh.
-2. Authentication → Sign-in method → bật Email/Password, tắt Email link nếu không dùng.
-3. Tạo Firestore ở chế độ production. Vào Rules, dán toàn bộ `firestore.rules`, bấm Publish; hoặc dùng Firebase CLI đã đăng nhập: `npx.cmd firebase deploy --only firestore:rules --project management-user-86623`.
-4. Project settings → Service accounts → Generate new private key. Lưu ngoài repository, ví dụ `D:\UserHub-Credentials\service-account.json`. Không gửi nội dung lên chat/GitHub.
-5. Sao chép `backend-admin/.env.example` thành `backend-admin/.env`, đặt `GOOGLE_APPLICATION_CREDENTIALS` là đường dẫn tuyệt đối. File này đã được gitignore.
-6. Authentication → Users → Add user để tạo Admin với mật khẩu riêng. Sao chép UID. Cấp claim từ terminal:
-
-```powershell
-node --env-file=backend-admin/.env scripts/set-admin-claim.mjs <UID_ADMIN>
-npm.cmd run backend
-```
-
-7. Terminal frontend phải bỏ biến Emulator nếu đã đặt:
-
-```powershell
-Remove-Item Env:EXPO_PUBLIC_USE_EMULATORS -ErrorAction SilentlyContinue
-# .env: EXPO_PUBLIC_USE_EMULATORS=false
-npm.cmd run web
-```
-
-8. Admin đăng xuất/đăng nhập lại để token có claim mới. Tài khoản User tự đăng ký từ app; ứng dụng tự tạo `users/{uid}`.
-
-## Ảnh và Expo Go
-
-Mặc định production cần Cloudinary cấu hình trên **backend**, không dùng secret trên Expo. Đặt `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET` trong `backend-admin/.env`. Backend xác thực ID token, kiểm tra nội dung ảnh bằng Sharp, giới hạn 5 MB/25 megapixel, chuyển JPEG tối đa 800 px, ký upload server-side. Firestore chỉ giữ URL ở `hinhanh`.
-
-Demo local không dùng dịch vụ ngoài: đặt `ALLOW_LOCAL_UPLOADS=true` và `PUBLIC_API_URL=http://<IP-LAN-PC>:3001` trong backend. Ảnh nằm trên PC; cần giữ backend chạy và sao lưu thư mục `backend-admin/uploads`. Local storage này dành cho demo; khi host thật nên dùng Cloudinary. Thay/xóa hồ sơ không tự xóa file ảnh cũ do không có metadata sở hữu ảnh trong schema bốn trường; cần dọn ảnh bằng quản trị dịch vụ lưu ảnh.
-
-Để dùng điện thoại thật:
-
-1. Cài Expo Go tương thích Expo SDK 58; điện thoại và PC cùng mạng.
-2. `.env`: `EXPO_PUBLIC_ADMIN_API_BASE_URL=http://<IP-LAN-PC>:3001`.
-3. Dùng Firebase thật để Auth/Firestore truy cập qua Internet; nếu dùng Emulator cần cấu hình host LAN trong `firebase.json` và `EXPO_PUBLIC_EMULATOR_HOST` (mặc định Emulator chỉ nghe loopback).
-4. `npx.cmd expo start --lan`, quét QR. Nếu không kết nối, kiểm tra firewall cho đúng mạng LAN riêng và port cần thiết.
-5. Đăng nhập User → Chỉnh sửa hồ sơ → Chọn ảnh → Lưu. Mở Web cùng tài khoản → xác nhận cùng ảnh. Thoát app/mở lại để kiểm tra AsyncStorage persistence.
-6. Ghi kết quả vào `docs/testing/manual-checklist.md`, chụp màn hình thật để bổ sung báo cáo. Không gọi ảnh mobile Web là ảnh Expo Go.
-
-## Kiểm thử và build
-
-Giữ Emulator chạy. **Test tích hợp xóa dữ liệu của project `demo-userhub`**, nên không chạy đồng thời với demo đang cần giữ dữ liệu; không tác động project Firebase thật.
-
-```powershell
-npm.cmd run typecheck
-npm.cmd run lint
-npm.cmd run test:integration
-# Sau integration, seed lại và giữ backend/frontend Emulator chạy
-node scripts/seed-emulator.mjs
-npx.cmd playwright install chromium
-npm.cmd run test:e2e
-npm.cmd run build:web
-npx.cmd expo export --platform android --output-dir dist-android
-```
-
-Khi seed/export cần các biến Emulator ở Terminal 2. Báo cáo kết quả test là JSON; Playwright tạo thêm `playwright-report/index.html`. Bundle Web ở `dist/`, Android ở `dist-android/` (bundle JS/Hermes, không phải APK).
-
-Xuất dữ liệu Firebase thật từ môi trường có service account:
-
-```powershell
-node --env-file=backend-admin/.env scripts/export-users.mjs
-# Kết quả: docs/database/users.json, kiểm tra đúng bốn trường và AUTH_MANAGED
-```
-
-Tạo lại báo cáo sau khi thêm bằng chứng:
-
-```powershell
+```sh
+npm run typecheck
+npm run lint
+npm run build:web
+npx expo export --platform android --output-dir dist-android
+node --env-file=.env scripts/verify-live.mjs
+node --env-file=.env --env-file=backend-admin/.env scripts/verify-permissions.mjs
+npm run test:e2e
+npm run export:products
+node --env-file=backend-admin/.env scripts/database-evidence.mjs
 python -m pip install -r scripts/requirements.txt
-python scripts/report.py
+npm run report
+python scripts/package.py
 ```
 
-## Cấu trúc và nguyên tắc
+Các kiểm thử trực tiếp tạo dữ liệu tạm rồi dọn dữ liệu của chính lần kiểm thử. Playwright cần backend cổng 3001 và bản web đã build tại cổng 8082. Kiểm thử rules riêng trên emulator: Java **21 trở lên**, `npx firebase emulators:exec --only firestore --project demo-management-product "npm run test:integration"`.
 
-`src/app/**/*.tsx`: màn hình/Expo Router. `src/components`: UI dùng chung. `src/config/firebase.ts` và `.native.ts`: Firebase Web/native, AsyncStorage persistence trên mobile. `backend-admin`: API tin cậy, không import vào client. `tests`: integration/Rules/Playwright. `scripts`: claim, seed, export, báo cáo.
+Kết quả thật nằm ở `docs/testing/`. Web và thao tác chọn ảnh ở kích thước điện thoại đã được kiểm thử bằng Chromium; Android đã export bundle, **chưa kiểm thử trên thiết bị thật**. Máy hiện tại chỉ có Java 17 hoạt động nên chưa chạy được bộ rules emulator; quyền truy cập đã được kiểm tra trực tiếp với Firebase thật.
 
-Hồ sơ Firestore đúng `{email, matkhau, hoten, hinhanh}` kiểu string; UID nằm ở document ID. `matkhau` luôn `AUTH_MANAGED`, không lưu plaintext/hash. Vai trò lấy từ custom claim `admin:true`; frontend chỉ điều hướng, server và Rules mới quyết định quyền. Mọi thay đổi Admin qua backend để giữ nhất quán Auth/Firestore. Create/update có xử lý bù; delete Auth trước rồi profile, có thể retry nếu còn profile. Backend khóa thao tác cùng UID trong một tiến trình; demo chạy một instance. Khi cần nhiều instance phải bổ sung điều phối giao dịch và reconciliation bền vững.
+Báo cáo: `docs/report/ManagementProduct_BaoCao.docx`. CSDL nộp: `docs/database/products.json` (mảng dữ liệu chỉ gồm bốn trường). Minh chứng dữ liệu thật: `docs/database/firebase-evidence.json` và ảnh 07; trang HTML minh chứng được ghi rõ là trang của dự án, không giả làm Firebase Console.
 
-Git repository đã khởi tạo tại thư mục này. Chưa có URL GitHub nếu chưa cung cấp remote/đăng nhập. Xem `docs/demo-script.md` để quay video trình diễn và điền link thật khi nộp.
+Source GitHub: https://github.com/NGUYENQUANGHUY1106/Management-Products. Video demo được lưu trong `docs/video/ManagementProduct_Demo.webm`; chưa tải lên dịch vụ video riêng. Có thể xem/tải video từ thư mục `docs/video` trên GitHub; nếu đề yêu cầu nền tảng video riêng, bổ sung URL thực tế trước khi nộp.

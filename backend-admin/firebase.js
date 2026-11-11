@@ -16,7 +16,7 @@ const app =
       ? { projectId: process.env.GCLOUD_PROJECT }
       : {
           credential: applicationDefault(),
-          projectId: process.env.FIREBASE_PROJECT_ID || "management-user-86623",
+          projectId: process.env.FIREBASE_PROJECT_ID || "management-product-e97a1",
         },
   );
 export const auth = getAuth(app);

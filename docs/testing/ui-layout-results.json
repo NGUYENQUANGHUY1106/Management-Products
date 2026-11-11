@@ -1,0 +1,21 @@
+{
+  "checkedAt": "2026-11-11T07:37:34.783Z",
+  "results": [
+    {
+      "name": "Existing localhost upload images load through LAN API",
+      "status": "PASS"
+    },
+    {
+      "name": "No horizontal overflow at 820px",
+      "status": "PASS"
+    },
+    {
+      "name": "No horizontal overflow at 390px",
+      "status": "PASS"
+    },
+    {
+      "name": "Add/edit/delete dialogs open and cancel without modifying products",
+      "status": "PASS"
+    }
+  ]
+}

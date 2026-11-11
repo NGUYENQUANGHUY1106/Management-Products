@@ -1,10 +1,10 @@
 export const colors = {
-  forest: "#173539",
-  teal: "#087C67",
-  cream: "#EDF3F0",
+  forest: "#142740",
+  teal: "#007D73",
+  cream: "#EEF2F8",
   white: "#FFFFFF",
-  border: "#D7E4DD",
-  muted: "#637B75",
-  error: "#B43C35",
-  light: "#F7FAF8",
+  border: "#DFE3EB",
+  muted: "#647084",
+  error: "#DC2626",
+  light: "#FFFFFF",
 };

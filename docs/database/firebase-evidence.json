@@ -1,0 +1,51 @@
+{
+  "projectId": "management-product-e97a1",
+  "capturedAt": "2026-11-11T07:33:55.518Z",
+  "source": "Firebase Admin SDK live read",
+  "authentication": {
+    "uid": "ej1v0UNUKogn81JLB9c90Tkn9GA3",
+    "email": "nguyenquanghuy110605@gmail.com",
+    "admin": true
+  },
+  "firestore": {
+    "collection": "products",
+    "products": [
+      {
+        "documentId": "SRCjBwopDqVQpAr4gUpz",
+        "fields": {
+          "name": "Nguyễn Quang Huy",
+          "price": 1000000,
+          "soluong": 10,
+          "image": "http://localhost:3001/uploads/dfb74d4b-03a7-4c57-a177-a42c02c83ef1.jpg"
+        }
+      },
+      {
+        "documentId": "sample-headphones",
+        "fields": {
+          "name": "Tai nghe không dây",
+          "price": 1250000,
+          "soluong": 8,
+          "image": "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=640"
+        }
+      },
+      {
+        "documentId": "sample-keyboard",
+        "fields": {
+          "name": "Bàn phím cơ",
+          "price": 790000,
+          "soluong": 12,
+          "image": "https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=640"
+        }
+      },
+      {
+        "documentId": "sample-mouse",
+        "fields": {
+          "name": "Chuột không dây",
+          "price": 350000,
+          "soluong": 25,
+          "image": "http://localhost:3001/uploads/9965d7aa-804d-4c88-9b1e-037db825efeb.jpg"
+        }
+      }
+    ]
+  }
+}

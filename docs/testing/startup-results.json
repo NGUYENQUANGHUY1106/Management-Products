@@ -1,0 +1,10 @@
+{
+  "checkedAt": "2026-11-11T07:37:38.005Z",
+  "web": "http://localhost:8081",
+  "expoGo": "exp://172.26.100.127:8081",
+  "lanApiStatus": 200,
+  "manifestStatus": 200,
+  "sdkVersion": "58.0.0",
+  "runtimeVersion": "exposdk:58.0.0",
+  "nativeDeviceTested": false
+}

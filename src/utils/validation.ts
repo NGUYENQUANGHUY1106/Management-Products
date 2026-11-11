@@ -1,27 +1,3 @@
-export function normalizeEmail(value: string) {
-  return value.trim().toLowerCase();
-}
-export function validate(
-  email: string,
-  name?: string,
-  password?: string,
-  confirm?: string,
-) {
-  if (
-    !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizeEmail(email)) ||
-    email.length > 254
-  )
-    throw new Error("Email không hợp lệ.");
-  if (
-    name !== undefined &&
-    (name.trim().length < 2 || name.trim().length > 100)
-  )
-    throw new Error("Họ tên phải từ 2 đến 100 ký tự.");
-  if (password !== undefined && (password.length < 8 || password.length > 128))
-    throw new Error("Mật khẩu phải từ 8 đến 128 ký tự.");
-  if (confirm !== undefined && password !== confirm)
-    throw new Error("Mật khẩu xác nhận chưa khớp.");
-}
 export function errorMessage(e: unknown): string {
   const code = (e as { code?: string })?.code;
   const messages: Record<string, string> = {
