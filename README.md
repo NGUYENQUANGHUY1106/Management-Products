@@ -11,6 +11,7 @@ Hướng dẫn chạy web + Expo Go: [docs/run-project.md](docs/run-project.md).
 - Chọn và tải ảnh từ thư viện thiết bị hoặc nhập URL ảnh; hiển thị ảnh sản phẩm.
 - Tìm theo tên, lọc khoảng giá từ–đến (gồm cả hai đầu, có thể bỏ trống một đầu), sắp xếp theo tên/giá, thống kê tồn kho và giá trị kho tính từ dữ liệu hiện có.
 - Giao diện sidebar và bảng sản phẩm trên web; popup thêm/sửa, xem trước ảnh, xác nhận xóa; bố cục gọn trên điện thoại.
+- Nút trái tim ở từng sản phẩm và trang **Sản phẩm yêu thích** (`/admin/favorites`), hỗ trợ tìm kiếm/lọc giá và hủy yêu thích.
 - Đồng bộ danh sách theo thời gian thực, kiểm tra dữ liệu và hiển thị lỗi.
 
 Ứng dụng chỉ gồm đăng nhập quản trị, phân quyền admin và quản lý sản phẩm. Tài liệu, dữ liệu JSON, hình minh họa và video trong thư mục `docs/` đều thuộc Management Product.
@@ -45,6 +46,8 @@ Collection `products`, mỗi document **đúng bốn trường**:
 | image | string | URL HTTP/HTTPS, tối đa 2.048 ký tự |
 
 Document ID do Firestore quản lý, không ghi thêm trường `id`. Không thêm category, description, createdAt hay role vào document sản phẩm. Admin nằm trong **Firebase Authentication**, quyền nằm trong custom claim; không lưu mật khẩu trong Firestore. Rules chặn toàn bộ truy cập sản phẩm của người chưa đăng nhập hoặc không có quyền admin.
+
+Yêu thích chỉ lưu danh sách document ID bằng AsyncStorage, riêng theo dự án Firebase và tài khoản admin trên thiết bị/trình duyệt hiện tại. Không thêm trường `favorite` hoặc collection Firestore. Danh sách được giữ sau tải lại trang/đăng xuất; không đồng bộ giữa thiết bị hoặc trình duyệt khác nhau, và có thể mất khi xóa dữ liệu ứng dụng. Sản phẩm đã bị xóa khỏi Firestore không xuất hiện trong trang yêu thích.
 
 ## Chạy trên máy hiện tại
 
@@ -85,6 +88,7 @@ Backend `/images` xác minh token và quyền admin, giới hạn 5 MB, kiểm t
 ```sh
 npm run typecheck
 npm run lint
+npm run test:favorites
 npm run build:web
 npx expo export --platform android --output-dir dist-android
 node --env-file=.env scripts/verify-live.mjs
@@ -94,7 +98,6 @@ npm run export:products
 node --env-file=backend-admin/.env scripts/database-evidence.mjs
 python -m pip install -r scripts/requirements.txt
 npm run report
-python scripts/package.py
 ```
 
 Các kiểm thử trực tiếp tạo dữ liệu tạm rồi dọn dữ liệu của chính lần kiểm thử. Playwright cần backend cổng 3001 và bản web đã build tại cổng 8082. Kiểm thử rules riêng trên emulator: Java **21 trở lên**, `npx firebase emulators:exec --only firestore --project demo-management-product "npm run test:integration"`.
@@ -103,4 +106,4 @@ Kết quả thật nằm ở `docs/testing/`. Web và thao tác chọn ảnh ở
 
 Báo cáo: `docs/report/ManagementProduct_BaoCao.docx`. CSDL nộp: `docs/database/products.json` (mảng dữ liệu chỉ gồm bốn trường). Minh chứng dữ liệu thật: `docs/database/firebase-evidence.json` và ảnh 07; trang HTML minh chứng được ghi rõ là trang của dự án, không giả làm Firebase Console.
 
-Source GitHub: https://github.com/NGUYENQUANGHUY1106/Management-Products. Video demo được lưu trong `docs/video/ManagementProduct_Demo.webm`; chưa tải lên dịch vụ video riêng. Có thể xem/tải video từ thư mục `docs/video` trên GitHub; nếu đề yêu cầu nền tảng video riêng, bổ sung URL thực tế trước khi nộp.
+Source GitHub: https://github.com/NGUYENQUANGHUY1106/Management-Products. Video demo được lưu trong `docs/video/ManagementProduct_Demo.webm`; phần yêu thích có video riêng `docs/video/ManagementProduct_Favorites.webm`. Có thể xem/tải video từ thư mục `docs/video` trên GitHub; nếu đề yêu cầu nền tảng video riêng, bổ sung URL thực tế trước khi nộp.

@@ -102,6 +102,94 @@
   },
   "suites": [
     {
+      "title": "favorites.spec.ts",
+      "file": "favorites.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "favorites can be added, persisted, searched and removed on desktop/mobile without changing products",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 17842,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-11T08:13:01.510Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "video",
+                      "contentType": "video/webm",
+                      "path": "D:\\Management User\\userhub\\test-results\\favorites-favorites-can-be-d95fa-e-without-changing-products\\video.webm"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "16966837d6a9b32aed7f-b0afe3fe03a6d46f20d1",
+          "file": "favorites.spec.ts",
+          "line": 11,
+          "column": 1
+        },
+        {
+          "title": "favorites read failure can be retried without changing product data",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 6279,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-11T08:13:19.479Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "video",
+                      "contentType": "video/webm",
+                      "path": "D:\\Management User\\userhub\\test-results\\favorites-favorites-read-f-71b66-thout-changing-product-data\\video.webm"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "16966837d6a9b32aed7f-5a0b2ca5a161a5d0494d",
+          "file": "favorites.spec.ts",
+          "line": 72,
+          "column": 1
+        }
+      ]
+    },
+    {
       "title": "products.spec.ts",
       "file": "products.spec.ts",
       "column": 0,
@@ -123,12 +211,12 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 33247,
+                  "duration": 20929,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-11-11T07:59:47.412Z",
+                  "startTime": "2026-11-11T08:13:25.783Z",
                   "annotations": [],
                   "attachments": [
                     {
@@ -152,9 +240,9 @@
   ],
   "errors": [],
   "stats": {
-    "startTime": "2026-11-11T07:59:45.863Z",
-    "duration": 36122.177,
-    "expected": 1,
+    "startTime": "2026-11-11T08:13:00.733Z",
+    "duration": 47101.793000000005,
+    "expected": 3,
     "skipped": 0,
     "unexpected": 0,
     "flaky": 0

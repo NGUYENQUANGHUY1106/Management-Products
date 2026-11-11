@@ -7,5 +7,8 @@
   "Rules emulator": "NOT RUN - requires Java 21; live permissions tested instead",
   "Price filters and image URL tests": "PASS (5 tests)",
   "Expo Go SDK 58 manifest": "PASS; LAN API HTTP 200",
-  "Responsive layout 820px/390px": "PASS; no horizontal overflow"
+  "Responsive layout 820px/390px": "PASS; no horizontal overflow",
+  "Favorites storage tests": "PASS (3 tests)",
+  "Favorites UI": "PASS (desktop/mobile; persistence, account isolation, read/write errors)",
+  "Firestore product schema": "PASS; unchanged name, price, soluong, image"
 }

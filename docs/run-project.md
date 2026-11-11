@@ -27,6 +27,8 @@ npm.cmd run build:web
 
 Ở màn hình danh sách có tìm theo tên, sắp xếp tên/giá, lọc giá, popup thêm/sửa và xác nhận xóa. Phân quyền admin nằm ở **Cài đặt hệ thống**.
 
+Bấm nút **trái tim** cạnh tên sản phẩm để yêu thích. Mở **Sản phẩm yêu thích** ở thanh điều hướng để xem danh sách hoặc bấm **Hủy yêu thích**. Yêu thích được lưu riêng theo tài khoản trên thiết bị/trình duyệt hiện tại; vẫn giữ sau khi tải lại/đăng nhập lại nhưng không đồng bộ sang máy khác. Chức năng này không thêm trường vào Firestore.
+
 ## Mở trên Expo Go
 
 1. Cài Expo Go tương thích **Expo SDK 58** trên điện thoại. Nếu báo không tương thích, cập nhật Expo Go hoặc chọn bản Android phù hợp từ https://expo.dev/go.

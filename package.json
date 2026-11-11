@@ -31,6 +31,7 @@
     "typescript": "~6.0.3"
   },
   "scripts": {
+    "test:favorites": "node --test tests/favorites.test.mjs",
     "test:filters": "node --test tests/product-filters.test.mjs",
     "admin:role": "node --env-file=backend-admin/.env scripts/set-admin-claim.mjs",
     "test:admin-roles": "node --env-file=.env --env-file=backend-admin/.env --test tests/admin-roles.test.mjs",

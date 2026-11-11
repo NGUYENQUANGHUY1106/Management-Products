@@ -1,0 +1,14 @@
+{
+  "checkedAt": "2026-11-11T08:14:23.401Z",
+  "projectId": "management-product-e97a1",
+  "productCount": 5,
+  "fields": [
+    "name",
+    "price",
+    "soluong",
+    "image"
+  ],
+  "productsUnchanged": true,
+  "favoritesStorage": "AsyncStorage (account + device)",
+  "newFirestoreFields": false
+}

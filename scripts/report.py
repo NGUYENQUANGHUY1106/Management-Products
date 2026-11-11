@@ -61,7 +61,7 @@ p('Công nghệ: React Native • Expo SDK 58 • Firebase Authentication • Cl
 p('Dự án Firebase: management-product-e97a1')
 p('Sinh viên: Nguyễn Quang Huy')
 p('Ngày cập nhật: 11/11/2026 (giờ Việt Nam)')
-p('Phạm vi: đăng nhập admin; nhập, hiển thị, sửa, xóa sản phẩm; chọn và hiển thị ảnh; chạy web và hỗ trợ ứng dụng di động.')
+p('Phạm vi: đăng nhập admin; nhập, hiển thị, sửa, xóa sản phẩm; chọn ảnh, lọc giá và yêu thích sản phẩm; chạy web và hỗ trợ ứng dụng di động.')
 p('Dữ liệu sản phẩm chỉ gồm: name, price, soluong, image.')
 p('Báo cáo trình bày triển khai Management Product, gồm mã nguồn, cơ sở dữ liệu, kết quả kiểm thử, hình minh họa và video quản lý sản phẩm.')
 
@@ -83,7 +83,8 @@ p('Web / Android / iOS dùng chung giao diện React Native. Expo Router điều
 table(['Thành phần', 'File / trách nhiệm'], [
     ['Đăng nhập', 'src/app/login.tsx — email/mật khẩu, chặn tài khoản thiếu claim.'],
     ['Phiên và phân quyền', 'src/contexts/AuthContext.tsx; src/app/admin/_layout.tsx.'],
-    ['Danh sách, tìm, sắp xếp, xóa', 'src/app/admin/products.tsx — onSnapshot theo thời gian thực.'],
+    ['Danh sách, tìm, sắp xếp, xóa', 'src/components/ProductCatalog.tsx; route src/app/admin/products.tsx.'],
+    ['Yêu thích sản phẩm', 'src/app/admin/favorites.tsx; src/contexts/FavoritesContext.tsx; lưu AsyncStorage theo tài khoản và thiết bị.'],
     ['Form thêm/sửa và chọn ảnh', 'src/components/ProductForm.tsx.'],
     ['Dữ liệu và kiểm tra', 'src/types/product.ts; src/services/products.ts.'],
     ['Kết nối Firebase', 'src/config/firebase.ts; firebase.native.ts.'],
@@ -157,6 +158,14 @@ page('7.1. Lọc theo khoảng giá sản phẩm')
 p('Nhập Giá từ và Giá đến (VNĐ), bấm Áp dụng. Hai biên đều được bao gồm; có thể để trống một đầu để lọc từ mức giá tối thiểu hoặc đến mức giá tối đa. Xóa bộ lọc đưa điều kiện giá về rỗng, giữ nguyên tìm kiếm/sắp xếp. Giá âm, sai kiểu hoặc Giá từ lớn hơn Giá đến được báo lỗi; ứng dụng giữ bộ lọc hợp lệ trước đó.')
 p('Ví dụ: khoảng 300000–800000 hiển thị sản phẩm có giá từ 300.000 đến 800.000 VNĐ. Lọc kết hợp với tên tìm kiếm, sắp xếp và dữ liệu cập nhật thời gian thực. Không thêm trường hoặc collection Firestore.')
 screenshot('09-price-filter.png', 'Hình 2a. Lọc theo khoảng giá, gồm cả hai đầu khoảng.')
+page('7.2. Sản phẩm yêu thích')
+p('Mỗi sản phẩm có nút trái tim để thêm/hủy yêu thích. Trang Sản phẩm yêu thích tại /admin/favorites hiển thị sản phẩm đã lưu, hỗ trợ tìm kiếm và lọc giá. Bấm Hủy yêu thích để đưa sản phẩm ra khỏi danh sách riêng; thông tin sản phẩm vẫn giữ nguyên trong Firestore.')
+p('Danh sách yêu thích lưu bằng AsyncStorage dưới dạng document ID, tách theo dự án Firebase và UID admin trên thiết bị/trình duyệt hiện tại. Giữ nguyên bốn trường name, price, soluong, image; không thêm trường hoặc collection Firestore. Danh sách được giữ sau tải lại trang/đăng nhập lại, không đồng bộ giữa các thiết bị. Xóa dữ liệu ứng dụng sẽ làm mất yêu thích cục bộ. Sản phẩm đã xóa khỏi Firestore được ẩn khỏi danh sách.')
+screenshot('11-favorites-web.png', 'Hình 2b. Trang sản phẩm yêu thích trên web.', 5.7)
+doc.add_page_break()
+h('7.3. Yêu thích trên màn hình điện thoại')
+screenshot('12-favorites-mobile.png', 'Hình 2c. Hủy yêu thích ở kích thước màn hình điện thoại.', 6.8)
+p('Kiểm thử gồm lưu/tải lại, hủy, đăng xuất/đăng nhập, phân tách tài khoản và thông báo lỗi đọc/ghi bộ nhớ cục bộ. Kiểm tra thiết bị thật vẫn cần thực hiện trên Expo Go.')
 
 page('8. Thêm và sửa sản phẩm')
 p('Bấm Thêm sản phẩm để mở popup, nhập tên, giá, số lượng và chọn ảnh hoặc URL. Khung xem trước có thể gỡ hoặc thay ảnh. Kiểm tra dữ liệu trước khi ghi Firestore; chỉ bốn trường được gửi đi. Bấm Thêm sản phẩm trong popup và chờ thông báo thành công trước khi tải lại trang.')
@@ -193,6 +202,7 @@ browser = read('docs/testing/browser-results.json', {})
 stats = browser.get('stats', {})
 p(f"Playwright: {stats.get('expected', 0)} kịch bản đạt; {stats.get('unexpected', 0)} kịch bản lỗi. Kịch bản bao gồm đăng nhập, ảnh, kiểm tra giá âm, thêm, tải lại trang, tìm, sửa, chọn ảnh mobile web, hủy xóa, xóa, đăng xuất và route guard.")
 p('Bổ sung đã kiểm tra khoảng giá gồm hai đầu, khoảng mở, khoảng rỗng, điều kiện sai, xóa lọc, kết hợp tìm kiếm/sắp xếp; kiểm tra ảnh upload localhost cũ được hiển thị qua IP LAN hiện tại. Bố cục 820px và 390px không tràn ngang. Popup thêm/sửa/xóa có thể hủy mà không thay đổi dữ liệu.')
+p('Kiểm thử yêu thích trên web và viewport điện thoại đạt: thêm, hủy, tải lại, đăng xuất/đăng nhập, tìm trong danh sách riêng, phân tách khóa tài khoản và thử lại sau lỗi bộ nhớ. Đối chiếu Firestore trước/sau kiểm thử cho thấy dữ liệu sản phẩm không đổi, vẫn đúng bốn trường. Minh chứng: docs/testing/favorites-schema-results.json.')
 build = read('docs/testing/build-results.json', {})
 table(['Kiểm tra mã nguồn / build', 'Trạng thái'], [(k, v) for k, v in build.items() if k != 'checkedAt'])
 p('Bộ rules emulator chưa chạy do môi trường Java hiện tại chưa đủ yêu cầu Java 21. Các quyền admin, khách, tài khoản không có claim và schema đã được kiểm tra trực tiếp với dự án Firebase mới. Tài khoản tạm và sản phẩm kiểm thử được dọn sau kiểm thử; ba sản phẩm mẫu được giữ lại.')
@@ -206,10 +216,11 @@ table(['Nội dung', 'Đường dẫn / trạng thái'], [
     ['Báo cáo mới', 'docs/report/ManagementProduct_BaoCao.docx'],
     ['CSDL JSON', 'docs/database/products.json'],
     ['Minh chứng dữ liệu thật', 'docs/database/firebase-evidence.json; docs/screenshots/07-firebase-data.png'],
-    ['Ảnh minh họa thao tác', 'docs/screenshots/00–07'],
+    ['Ảnh minh họa thao tác', 'docs/screenshots/00–12; trang yêu thích ở ảnh 11 và 12.'],
     ['Video demo web', 'docs/video/ManagementProduct_Demo.webm (tệp cục bộ)'],
+    ['Video yêu thích sản phẩm', 'docs/video/ManagementProduct_Favorites.webm (thêm, hủy, tải lại, đăng nhập lại và xử lý lỗi bộ nhớ).'],
     ['Kết quả kiểm thử', 'docs/testing/*.json'],
-    ['Mã nguồn', 'Thư mục dự án và ManagementProduct_Submission.zip sau khi chạy script đóng gói.'],
+    ['Mã nguồn', 'Repository GitHub Management-Products; sử dụng mã nguồn trực tiếp, không yêu cầu file ZIP.'],
     ['GitHub source code', 'https://github.com/NGUYENQUANGHUY1106/Management-Products'],
     ['Link video demo', 'https://github.com/NGUYENQUANGHUY1106/Management-Products/blob/main/docs/video/ManagementProduct_Demo.webm (tệp đính kèm; chưa tải lên nền tảng video riêng).']])
 h('13.1. Đối chiếu Firebase Console', 2)
