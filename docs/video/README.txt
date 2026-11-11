@@ -1,0 +1,1 @@
+Actual browser recording of UserHub with real Firebase management-user-86623. This short Web recording does not replace the required 3-6 minute narrated video with physical Expo Go evidence. See docs/demo-script.md.

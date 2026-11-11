@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "userhub",
+    "name": "UserHub",
     "slug": "userhub",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -19,7 +19,20 @@
       "predictiveBackGestureEnabled": false
     },
     "web": {
-      "favicon": "./assets/favicon.png"
-    }
+      "bundler": "metro",
+      "output": "single"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow UserHub to choose your profile photo.",
+          "cameraPermission": false,
+          "microphonePermission": false
+        }
+      ]
+    ],
+    "scheme": "userhub"
   }
 }

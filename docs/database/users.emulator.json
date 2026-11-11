@@ -1,0 +1,86 @@
+{
+  "0hib9KAW3DPtPH6i0Niuaa3t42w0": {
+    "email": "member2@userhub.test",
+    "hoten": "Trần Bảo An",
+    "hinhanh": "",
+    "matkhau": "AUTH_MANAGED"
+  },
+  "EM6wyEPL0qjk21SqLe7468JH4eeP": {
+    "email": "member9@userhub.test",
+    "hoten": "Phan Thùy Dương",
+    "hinhanh": "",
+    "matkhau": "AUTH_MANAGED"
+  },
+  "FyHKXykOPl7FqcG6j686nHH11Irw": {
+    "email": "member11@userhub.test",
+    "hoten": "Mai Phương Thảo",
+    "hinhanh": "",
+    "matkhau": "AUTH_MANAGED"
+  },
+  "K7olkf3Qa0YeO5PG5EkECYwkdAHh": {
+    "email": "member6@userhub.test",
+    "hoten": "Vũ Thanh Tâm",
+    "hinhanh": "",
+    "matkhau": "AUTH_MANAGED"
+  },
+  "KQYIIXiDPe5QPjENEXoL9g0n354f": {
+    "email": "member4@userhub.test",
+    "hoten": "Phạm Hoàng Nam",
+    "hinhanh": "",
+    "matkhau": "AUTH_MANAGED"
+  },
+  "VHrxRs3OyxC207ujSTuDoxjaNx6g": {
+    "email": "member12@userhub.test",
+    "hoten": "Ngô Hải Yến",
+    "hinhanh": "",
+    "matkhau": "AUTH_MANAGED"
+  },
+  "WYwqjhXcTXwRSvSrM6A1FiikW4d6": {
+    "email": "member5@userhub.test",
+    "hoten": "Đỗ Ngọc Hà",
+    "hinhanh": "",
+    "matkhau": "AUTH_MANAGED"
+  },
+  "Zz11Fe8JznjpWdluF6Iw1dvpaukS": {
+    "email": "member1@userhub.test",
+    "hoten": "Nguyễn Quang Huy",
+    "hinhanh": "",
+    "matkhau": "AUTH_MANAGED"
+  },
+  "aoAsDuw6Hercb6UwQSYwbi4vYZzo": {
+    "email": "member7@userhub.test",
+    "hoten": "Bùi Khánh Linh",
+    "hinhanh": "",
+    "matkhau": "AUTH_MANAGED"
+  },
+  "bKEHpfvHdVdj4SiLrdRhHASTXlJk": {
+    "email": "member3@userhub.test",
+    "hoten": "Lê Minh Anh",
+    "hinhanh": "",
+    "matkhau": "AUTH_MANAGED"
+  },
+  "hYwPWSfePdqjaKgHop2jDpHqa54X": {
+    "email": "member8@userhub.test",
+    "hoten": "Hoàng Gia Bảo",
+    "hinhanh": "",
+    "matkhau": "AUTH_MANAGED"
+  },
+  "lBxnic2D5KcdVqIpcvkBiu1g15EU": {
+    "email": "other@example.test",
+    "hoten": "Other User",
+    "hinhanh": "",
+    "matkhau": "AUTH_MANAGED"
+  },
+  "wLfFh2RNI79zyNxaT4swdeoBpgzI": {
+    "email": "integration-user@example.test",
+    "matkhau": "AUTH_MANAGED",
+    "hoten": "Updated User",
+    "hinhanh": "http://localhost:3001/uploads/c26ca789-3dc8-4fe3-b1e1-89c9fdbe1248.jpg"
+  },
+  "x9gc2H4OFp94UfWBRj87yMDfEtCj": {
+    "email": "member10@userhub.test",
+    "hoten": "Đặng Đức Minh",
+    "hinhanh": "",
+    "matkhau": "AUTH_MANAGED"
+  }
+}

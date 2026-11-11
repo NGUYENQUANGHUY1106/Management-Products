@@ -1,0 +1,66 @@
+{
+  "date": "2026-11-11T02:06:37.458Z",
+  "project": "management-user-86623",
+  "results": [
+    {
+      "id": "LIVE-U01",
+      "title": "Register actual Auth and exact four-field Firestore profile",
+      "status": "PASS",
+      "environment": "Firebase management-user-86623"
+    },
+    {
+      "id": "LIVE-U02",
+      "title": "Duplicate email and invalid password rejected",
+      "status": "PASS",
+      "environment": "Firebase management-user-86623"
+    },
+    {
+      "id": "LIVE-U05",
+      "title": "Own name update persisted, sensitive fields denied by deployed Rules",
+      "status": "PASS",
+      "environment": "Firebase management-user-86623"
+    },
+    {
+      "id": "LIVE-U07",
+      "title": "User denied Admin endpoints on real Firebase token",
+      "status": "PASS",
+      "environment": "Firebase management-user-86623"
+    },
+    {
+      "id": "LIVE-U08",
+      "title": "Sign out and sign in again",
+      "status": "PASS",
+      "environment": "Firebase management-user-86623"
+    },
+    {
+      "id": "LIVE-A01",
+      "title": "Real Admin claim and backend verification",
+      "status": "PASS",
+      "environment": "Firebase management-user-86623"
+    },
+    {
+      "id": "LIVE-A02",
+      "title": "Backend creates actual Auth account and profile without changing Admin session",
+      "status": "PASS",
+      "environment": "Firebase management-user-86623"
+    },
+    {
+      "id": "LIVE-A04",
+      "title": "Email update consistent in real Auth and Firestore",
+      "status": "PASS",
+      "environment": "Firebase management-user-86623"
+    },
+    {
+      "id": "LIVE-A05",
+      "title": "Real account delete prevents login and removes profile",
+      "status": "PASS",
+      "environment": "Firebase management-user-86623"
+    },
+    {
+      "id": "LIVE-IMAGE",
+      "title": "Authenticated local-demo image upload and public URL retrieval",
+      "status": "PASS",
+      "environment": "Firebase management-user-86623"
+    }
+  ]
+}

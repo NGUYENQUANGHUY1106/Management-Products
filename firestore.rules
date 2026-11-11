@@ -1,0 +1,26 @@
+rules_version = '2';
+service cloud.firestore {
+ match /databases/{database}/documents {
+  match /users/{uid} {
+   function signedIn() { return request.auth != null; }
+   function admin() { return signedIn() && request.auth.token.get('admin', false) == true; }
+   function owner() { return signedIn() && request.auth.uid == uid; }
+   function valid() {
+    let d = request.resource.data;
+    return d.keys().hasAll(['email','matkhau','hoten','hinhanh'])
+      && d.keys().hasOnly(['email','matkhau','hoten','hinhanh'])
+      && d.email is string && d.email.size() <= 254
+      && d.matkhau == 'AUTH_MANAGED'
+      && d.hoten is string && d.hoten.size() >= 2 && d.hoten.size() <= 100
+      && d.hinhanh is string && d.hinhanh.size() <= 2048
+      && (d.hinhanh == '' || d.hinhanh.matches('https?://.*'));
+   }
+   allow get: if owner() || admin();
+   allow list: if admin();
+   allow create: if owner() && valid() && request.resource.data.email == request.auth.token.email;
+   allow update: if owner() && valid() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['hoten','hinhanh']);
+   // Admin updates also go through validated backend to preserve Auth consistency.
+   allow delete: if false;
+  }
+ }
+}

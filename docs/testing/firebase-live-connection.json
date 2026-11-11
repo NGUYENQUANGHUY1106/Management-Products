@@ -1,0 +1,12 @@
+{
+  "date": "2026-11-11T01:40:23.054Z",
+  "httpStatus": 200,
+  "result": {
+    "projectId": "160088704615",
+    "authorizedDomains": [
+      "localhost",
+      "management-user-86623.firebaseapp.com",
+      "management-user-86623.web.app"
+    ]
+  }
+}

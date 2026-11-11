@@ -39,3 +39,20 @@ yarn-error.*
 # generated native folders
 /ios
 /android
+
+.env
+.env.*
+!.env.example
+backend-admin/.env
+**/service-account*.json
+**/*adminsdk*.json
+backend-admin/uploads/
+backend-admin/node_modules/
+*.log
+test-results/
+playwright-report/
+docs/screenshots/test-*
+dist-android/
+docs/video/page@*.webm
+__pycache__/
+docs/report/preview-*.png

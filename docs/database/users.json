@@ -1,0 +1,122 @@
+{
+  "6uc09Ic6cXUc2D0jVU5oqum1r8J2": {
+    "email": "member1@userhub.example",
+    "hoten": "Nguyễn Quang Huy",
+    "matkhau": "AUTH_MANAGED",
+    "hinhanh": "http://172.20.10.2:3001/uploads/5b045309-1648-4885-bb5f-e39a8ee2f0ea.jpg"
+  },
+  "HTm3HZ5eCebxnwZRgdEvIPpC1xI2": {
+    "email": "member9@userhub.example",
+    "hoten": "Phan Thùy Dương",
+    "hinhanh": "",
+    "matkhau": "AUTH_MANAGED"
+  },
+  "IwJOc9e7Byb4iE3kZmv4YakjS2K3": {
+    "email": "member7@userhub.example",
+    "hoten": "Bùi Khánh Linh",
+    "hinhanh": "",
+    "matkhau": "AUTH_MANAGED"
+  },
+  "M0rPhHH9JvOE9F0YO0SisgkP3X93": {
+    "email": "member6@userhub.example",
+    "hoten": "Vũ Thanh Tâm",
+    "hinhanh": "",
+    "matkhau": "AUTH_MANAGED"
+  },
+  "NLyRyYZoibao1ToMtQKOp9wtJ572": {
+    "email": "member11@userhub.example",
+    "hoten": "Mai Phương Thảo",
+    "hinhanh": "",
+    "matkhau": "AUTH_MANAGED"
+  },
+  "On8CoMmU0wPk4KU03TmKes4znaU2": {
+    "email": "member4@userhub.example",
+    "hoten": "Phạm Hoàng Nam",
+    "hinhanh": "",
+    "matkhau": "AUTH_MANAGED"
+  },
+  "P6dMF2ZiiCYnQwcX7SO0VsKhjSf2": {
+    "email": "member12@userhub.example",
+    "hoten": "Ngô Hải Yến",
+    "hinhanh": "",
+    "matkhau": "AUTH_MANAGED"
+  },
+  "SU4Bx9e7eGWA6vqeA1u3XL6ImaH3": {
+    "email": "edited-1794362126431@userhub.test",
+    "hoten": "Admin Edited Browser",
+    "hinhanh": "",
+    "matkhau": "AUTH_MANAGED"
+  },
+  "TQlukO32Z9h9JmAELvdrEmMPmce2": {
+    "email": "browser-1794362573052@userhub.test",
+    "matkhau": "AUTH_MANAGED",
+    "hinhanh": "",
+    "hoten": "Tên đã cập nhật"
+  },
+  "Weyz4lbTmiVUROQNOZIa3eTzZCt2": {
+    "email": "browser-1794362064470@userhub.test",
+    "matkhau": "AUTH_MANAGED",
+    "hinhanh": "",
+    "hoten": "Tên đã cập nhật"
+  },
+  "dVyN4Zd3pyWuvPxwoosKFSboyaE2": {
+    "email": "member8@userhub.example",
+    "hoten": "Hoàng Gia Bảo",
+    "hinhanh": "",
+    "matkhau": "AUTH_MANAGED"
+  },
+  "eqjS0KQPvhZFcsr07IXe46MzgU43": {
+    "email": "browser-1794362742360@userhub.test",
+    "matkhau": "AUTH_MANAGED",
+    "hinhanh": "",
+    "hoten": "Tên đã cập nhật"
+  },
+  "fZI7eOHPJkamK8KfGtty82SX3nd2": {
+    "email": "member2@userhub.example",
+    "hoten": "Trần Bảo An",
+    "hinhanh": "",
+    "matkhau": "AUTH_MANAGED"
+  },
+  "fd9npHhGvtXmQEI6a4ecSuYiHfN2": {
+    "email": "member5@userhub.example",
+    "hoten": "Đỗ Ngọc Hà",
+    "hinhanh": "",
+    "matkhau": "AUTH_MANAGED"
+  },
+  "fyenR2yLu1gqZdz1WjfMY4cKtSf1": {
+    "email": "member3@userhub.example",
+    "hoten": "Lê Minh Anh",
+    "hinhanh": "",
+    "matkhau": "AUTH_MANAGED"
+  },
+  "jkdmpKBbI9hLRGeeYLpjid6v1MX2": {
+    "email": "member10@userhub.example",
+    "hoten": "Đặng Đức Minh",
+    "hinhanh": "",
+    "matkhau": "AUTH_MANAGED"
+  },
+  "nX4o0uhL7xVBkTzantxUX8MM1OV2": {
+    "email": "browser-1794361696723@userhub.test",
+    "matkhau": "AUTH_MANAGED",
+    "hinhanh": "",
+    "hoten": "Tên đã cập nhật"
+  },
+  "sMy1KnJAqPQeIkkfIwrTSG1Y7q12": {
+    "email": "browser-1794362351938@userhub.test",
+    "matkhau": "AUTH_MANAGED",
+    "hinhanh": "",
+    "hoten": "Tên đã cập nhật"
+  },
+  "y6cQfXrPNYbAE6mWLOfBjFqhafw2": {
+    "email": "edited-1794362694854@userhub.test",
+    "hoten": "Admin Edited Browser",
+    "hinhanh": "",
+    "matkhau": "AUTH_MANAGED"
+  },
+  "zFKq7OSHw9ae8726rK2PVvsI5ZT2": {
+    "email": "edited-1794362477500@userhub.test",
+    "hoten": "Admin Edited Browser",
+    "hinhanh": "",
+    "matkhau": "AUTH_MANAGED"
+  }
+}
