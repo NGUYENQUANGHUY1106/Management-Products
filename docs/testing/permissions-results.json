@@ -20,10 +20,6 @@
     {
       "name": "Anonymous image upload denied",
       "status": "PASS"
-    },
-    {
-      "name": "Removed user API returns 404",
-      "status": "PASS"
     }
   ],
   "temporaryAccountRemoved": true

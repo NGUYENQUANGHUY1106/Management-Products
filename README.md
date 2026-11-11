@@ -13,7 +13,7 @@ Hướng dẫn chạy web + Expo Go: [docs/run-project.md](docs/run-project.md).
 - Giao diện sidebar và bảng sản phẩm trên web; popup thêm/sửa, xem trước ảnh, xác nhận xóa; bố cục gọn trên điện thoại.
 - Đồng bộ danh sách theo thời gian thực, kiểm tra dữ liệu và hiển thị lỗi.
 
-Đã bỏ đăng ký, hồ sơ cá nhân, phân hệ user và quản lý tài khoản người dùng. Tài liệu UserHub cũ được giữ riêng trong `docs/archive-userhub/`, không thuộc bài nộp mới.
+Ứng dụng chỉ gồm đăng nhập quản trị, phân quyền admin và quản lý sản phẩm. Tài liệu, dữ liệu JSON, hình minh họa và video trong thư mục `docs/` đều thuộc Management Product.
 
 ## Cấp quyền admin cho tài khoản khác
 

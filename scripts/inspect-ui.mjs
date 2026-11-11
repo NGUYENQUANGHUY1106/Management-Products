@@ -8,6 +8,8 @@ try {
   const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
   page.setDefaultTimeout(30000);
   await page.goto(process.env.PRODUCT_WEB_URL || 'http://localhost:8082', { waitUntil: 'domcontentloaded', timeout: 90000 });
+  await page.getByLabel('Email', { exact: true }).waitFor();
+  await page.screenshot({ path: 'docs/screenshots/00-login-web.png', fullPage: true, animations: 'disabled' });
   await page.getByLabel('Email', { exact: true }).fill(login.adminEmail);
   await page.getByLabel('Mật khẩu', { exact: true }).fill(login.password);
   await page.getByRole('button', { name: 'Đăng nhập', exact: true }).click();

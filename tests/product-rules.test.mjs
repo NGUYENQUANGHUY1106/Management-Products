@@ -23,7 +23,7 @@ test('products: admin CRUD, permissions and exactly four fields', async () => {
       await assertFails(setDoc(doc(db, 'products/forbidden'), data));
       await assertFails(deleteDoc(doc(db, 'products/rule-test')));
     }
-    await assertFails(setDoc(doc(admin, 'users/old-user'), { name: 'Old user' }));
+    await assertFails(setDoc(doc(admin, 'unrelated/test-record'), { value: 'blocked' }));
     await assertSucceeds(deleteDoc(ref));
   } finally { await env.cleanup(); }
 });

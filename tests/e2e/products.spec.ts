@@ -6,6 +6,7 @@ test('admin login, product CRUD, image upload, mobile layout and logout', async 
   const name = 'Sản phẩm demo ' + Date.now();
   await page.goto('/admin/products');
   await expect(page).toHaveURL(/\/login$/);
+  await page.getByLabel('Email', { exact: true }).waitFor();
   await page.screenshot({ path: 'docs/screenshots/00-login-web.png', fullPage: true, animations: 'disabled' });
   await page.getByLabel('Email', { exact: true }).fill(credentials.adminEmail);
   await page.getByLabel('Mật khẩu', { exact: true }).fill(credentials.password);
@@ -31,7 +32,7 @@ test('admin login, product CRUD, image upload, mobile layout and logout', async 
     await page.getByLabel('Giá sản phẩm (VNĐ)', { exact: true }).fill('250000');
     const chooser = page.waitForEvent('filechooser');
     await page.getByRole('button', { name: 'Chọn ảnh sản phẩm', exact: true }).click();
-    await (await chooser).setFiles('tests/fixtures/avatar.png');
+    await (await chooser).setFiles('tests/fixtures/product.png');
     await expect(page.getByLabel('URL hình ảnh', { exact: true })).toHaveValue(/\/uploads\/.+\.jpg$/);
     await page.screenshot({ path: 'docs/screenshots/02-create-product-web.png', fullPage: true, animations: 'disabled' });
     await page.getByRole('button', { name: 'Lưu sản phẩm', exact: true }).click();
@@ -77,7 +78,7 @@ test('admin login, product CRUD, image upload, mobile layout and logout', async 
     await page.getByRole('button', { name: `Sửa ${name}`, exact: true }).click();
     const mobileChooser = page.waitForEvent('filechooser');
     await page.getByRole('button', { name: 'Chọn ảnh sản phẩm', exact: true }).click();
-    await (await mobileChooser).setFiles('tests/fixtures/avatar.png');
+    await (await mobileChooser).setFiles('tests/fixtures/product.png');
     await expect(page.getByRole('button', { name: 'Chọn ảnh sản phẩm', exact: true })).toBeEnabled();
     await page.screenshot({ path: 'docs/screenshots/05-image-mobile-web.png', fullPage: true, animations: 'disabled' });
     await page.getByRole('button', { name: 'Lưu sản phẩm', exact: true }).click();

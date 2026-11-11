@@ -19,7 +19,6 @@ try {
   await check('Non-admin cannot delete products', () => assert.rejects(deleteDoc(doc(db, 'products/permission-test')), e => e.code === 'permission-denied'));
   await check('Non-admin image upload denied', async () => { const r = await fetch('http://localhost:3001/images', { method: 'POST', headers: { Authorization: 'Bearer ' + await auth.currentUser.getIdToken() } }); assert.equal(r.status, 403); });
   await check('Anonymous image upload denied', async () => { const r = await fetch('http://localhost:3001/images', { method: 'POST' }); assert.equal(r.status, 401); });
-  await check('Removed user API returns 404', async () => { assert.equal((await fetch('http://localhost:3001/admin/users')).status, 404); });
 } finally {
   if (member) await adminAuth.deleteUser(member.uid);
   await deleteApp(app);

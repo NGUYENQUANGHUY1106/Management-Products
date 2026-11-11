@@ -58,7 +58,6 @@ docs/video/page@*.webm
 __pycache__/
 docs/report/preview-*.png
 
-# Local historical submission and private login files
-/docs/archive-userhub/
+# Private login files
 **/admin-login.json
 ~$*
